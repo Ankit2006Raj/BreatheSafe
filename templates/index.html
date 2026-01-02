@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BreatheSafe AI - Next-Gen Air Quality Platform</title>
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#6366f1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <!-- Animated Background -->
+    <div class="animated-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+        <div class="mesh-gradient"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar-modern">
+        <div class="container-fluid">
+            <div class="navbar-content">
+                <div class="navbar-brand-modern">
+                    <div class="brand-icon">
+                        <i class="bi bi-wind"></i>
+                    </div>
+                    <div class="brand-text">
+                        <span class="brand-name">BreatheSafe</span>
+                        <span class="brand-ai">AI</span>
+                    </div>
+                    <span class="live-badge">
+                        <span class="pulse-ring"></span>
+                        <span class="pulse-dot"></span>
+                        LIVE
+                    </span>
+                </div>
+
+                <div class="navbar-menu">
+                    <a href="#hero" class="nav-link-modern active">
+                        <i class="bi bi-house-door"></i>
+                        <span>Home</span>
+                    </a>
+                    <a href="#monitor" class="nav-link-modern">
+                        <i class="bi bi-activity"></i>
+                        <span>Monitor</span>
+                    </a>
+                    <a href="#predict" class="nav-link-modern">
+                        <i class="bi bi-cpu"></i>
+                        <span>Predict</span>
+                    </a>
+                    <a href="#map" class="nav-link-modern">
+                        <i class="bi bi-globe"></i>
+                        <span>Map</span>
+                    </a>
+                </div>
+
+                <div class="navbar-actions">
+                    <button class="action-btn" id="darkModeToggle">
+                        <i class="bi bi-moon-stars"></i>
+                    </button>
+                    <button class="action-btn" data-bs-toggle="modal" data-bs-target="#alertModal">
+                        <i class="bi bi-bell"></i>
+                    </button>
+                    <button class="btn-gradient">
+                        <i class="bi bi-download me-2"></i>
+                        Install App
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <!-- H
+ero Section -->
+    <section id="hero" class="hero-modern">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6" data-aos="fade-right">
+                    <div class="hero-badge">
+                        <i class="bi bi-stars"></i>
+                        <span>AI-Powered Air Quality Intelligence</span>
+                    </div>
+                    <h1 class="hero-title">
+                        Breathe Smarter with
+                        <span class="gradient-text">Real-Time</span>
+                        Air Quality Insights
+                    </h1>
+                    <p class="hero-subtitle">
+                        Advanced machine learning meets real-time monitoring. Get instant AQI predictions,
+                        health recommendations, and live updates from cities worldwide.
+                    </p>
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <div class="stat-icon">
+                                <i class="bi bi-lightning-charge"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="modelAccuracy">95%</div>
+                                <div class="stat-label">Accuracy</div>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon">
+                                <i class="bi bi-globe2"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-value">10+</div>
+                                <div class="stat-label">Cities</div>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon">
+                                <i class="bi bi-clock-history"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-value">24/7</div>
+                                <div class="stat-label">Monitoring</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hero-actions">
+                        <a href="#monitor" class="btn-primary-modern">
+                            <span>Start Monitoring</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+                        <a href="#predict" class="btn-secondary-modern">
+                            <i class="bi bi-play-circle"></i>
+                            <span>Watch Demo</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6" data-aos="fade-left">
+                    <div class="hero-visual">
+                        <div class="aqi-card-3d">
+                            <div class="card-glow"></div>
+                            <div class="aqi-display">
+                                <div class="aqi-label">Current AQI</div>
+                                <div class="aqi-value-hero" id="heroAQI">--</div>
+                                <div class="aqi-status" id="heroStatus">Monitoring...</div>
+                                <div class="aqi-trend">
+                                    <canvas id="miniChart" width="300" height="80"></canvas>
+                                </div>
+                            </div>
+                            <div class="card-particles">
+                                <span></span><span></span><span></span><span></span><span></span>
+                            </div>
+                        </div>
+                        <div class="floating-elements">
+                            <div class="float-card card-1">
+                                <i class="bi bi-droplet-fill"></i>
+                                <span>PM2.5</span>
+                                <strong id="floatPM25">--</strong>
+                            </div>
+                            <div class="float-card card-2">
+                                <i class="bi bi-thermometer-half"></i>
+                                <span>Temp</span>
+                                <strong id="floatTemp">--°C</strong>
+                            </div>
+                            <div class="float-card card-3">
+                                <i class="bi bi-moisture"></i>
+                                <span>Humidity</span>
+                                <strong id="floatHumidity">--%</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Real-Time Monitor Section -->
+    <section id="monitor" class="section-modern">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <div class="section-badge">
+                    <i class="bi bi-broadcast"></i>
+                    <span>Live Monitoring</span>
+                </div>
+                <h2 class="section-title">Real-Time Air Quality Dashboard</h2>
+                <p class="section-subtitle">Live data updates every 5 seconds from global monitoring stations</p>
+            </div>
+
+            <div class="monitor-grid">
+                <div class="monitor-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="monitor-icon gradient-purple">
+                        <i class="bi bi-droplet-fill"></i>
+                    </div>
+                    <div class="monitor-content">
+                        <div class="monitor-label">PM2.5</div>
+                        <div class="monitor-value" id="realtimePM25">--</div>
+                        <div class="monitor-unit">µg/m³</div>
+                    </div>
+                    <div class="monitor-trend">
+                        <i class="bi bi-graph-up-arrow text-success"></i>
+                        <span>+2.3%</span>
+                    </div>
+                </div>
+
+                <div class="monitor-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="monitor-icon gradient-blue">
+                        <i class="bi bi-cloud-fill"></i>
+                    </div>
+                    <div class="monitor-content">
+                        <div class="monitor-label">PM10</div>
+                        <div class="monitor-value" id="realtimePM10">--</div>
+                        <div class="monitor-unit">µg/m³</div>
+                    </div>
+                    <div class="monitor-trend">
+                        <i class="bi bi-graph-down-arrow text-danger"></i>
+                        <span>-1.5%</span>
+                    </div>
+                </div>
+
+                <div class="monitor-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="monitor-icon gradient-orange">
+                        <i class="bi bi-thermometer-half"></i>
+                    </div>
+                    <div class="monitor-content">
+                        <div class="monitor-label">Temperature</div>
+                        <div class="monitor-value" id="realtimeTemp">--</div>
+                        <div class="monitor-unit">°C</div>
+                    </div>
+                    <div class="monitor-trend">
+                        <i class="bi bi-dash"></i>
+                        <span>Stable</span>
+                    </div>
+                </div>
+
+                <div class="monitor-card" data-aos="fade-up" data-aos-delay="400">
+                    <div class="monitor-icon gradient-green">
+                        <i class="bi bi-moisture"></i>
+                    </div>
+                    <div class="monitor-content">
+                        <div class="monitor-label">Humidity</div>
+                        <div class="monitor-value" id="realtimeHumidity">--</div>
+                        <div class="monitor-unit">%</div>
+                    </div>
+                    <div class="monitor-trend">
+                        <i class="bi bi-graph-up-arrow text-success"></i>
+                        <span>+0.8%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container-modern" data-aos="fade-up" data-aos-delay="500">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <i class="bi bi-graph-up"></i>
+                        <span>Live AQI Trend</span>
+                    </div>
+                    <div class="chart-controls">
+                        <button class="time-btn active" onclick="setChartRange(24)">24H</button>
+                        <button class="time-btn" onclick="setChartRange(48)">48H</button>
+                        <button class="time-btn" onclick="setChartRange(72)">72H</button>
+                    </div>
+                </div>
+                <div class="chart-body">
+                    <canvas id="realtimeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+    ""
+
+    <!-- AQI Predictor Section -->
+    <section id="predict" class="section-modern section-dark">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <div class="section-badge">
+                    <i class="bi bi-cpu"></i>
+                    <span>AI Prediction</span>
+                </div>
+                <h2 class="section-title">Intelligent AQI Predictor</h2>
+                <p class="section-subtitle">Advanced machine learning model with 95%+ accuracy</p>
+            </div>
+
+            <div class="predictor-container">
+                <div class="row g-4">
+                    <div class="col-lg-5" data-aos="fade-right">
+                        <div class="control-panel">
+                            <div class="panel-header">
+                                <h3>Input Parameters</h3>
+                                <div class="preset-chips">
+                                    <button class="chip-btn" onclick="loadPreset('clean')">
+                                        <i class="bi bi-check-circle"></i> Clean
+                                    </button>
+                                    <button class="chip-btn" onclick="loadPreset('moderate')">
+                                        <i class="bi bi-exclamation-circle"></i> Moderate
+                                    </button>
+                                    <button class="chip-btn" onclick="loadPreset('polluted')">
+                                        <i class="bi bi-x-circle"></i> Polluted
+                                    </button>
+                                </div>
+                            </div>
+
+                            <form id="aqiForm" class="control-form">
+                                <div class="param-group">
+                                    <div class="param-header">
+                                        <i class="bi bi-droplet"></i>
+                                        <span>Pollutants</span>
+                                    </div>
+
+                                    <div class="slider-control">
+                                        <label>PM2.5 <span class="unit">µg/m³</span></label>
+                                        <div class="slider-wrapper">
+                                            <input type="range" id="pm25" min="0" max="250" value="80"
+                                                class="modern-slider">
+                                            <input type="number" id="pm25Input" value="80" min="0" max="250"
+                                                class="value-input">
+                                        </div>
+                                    </div>
+
+                                    <div class="slider-control">
+                                        <label>PM10 <span class="unit">µg/m³</span></label>
+                                        <div class="slider-wrapper">
+                                            <input type="range" id="pm10" min="0" max="350" value="120"
+                                                class="modern-slider">
+                                            <input type="number" id="pm10Input" value="120" min="0" max="350"
+                                                class="value-input">
+                                        </div>
+                                    </div>
+
+                                    <div class="slider-control">
+                                        <label>NO2 <span class="unit">ppb</span></label>
+                                        <div class="slider-wrapper">
+                                            <input type="range" id="no2" min="0" max="100" value="40"
+                                                class="modern-slider">
+                                            <input type="number" id="no2Input" value="40" min="0" max="100"
+                                                class="value-input">
+                                        </div>
+                                    </div>
+
+                                    <div class="slider-control">
+                                        <label>O3 <span class="unit">ppb</span></label>
+                                        <div class="slider-wrapper">
+                                            <input type="range" id="o3" min="0" max="150" value="60"
+                                                class="modern-slider">
+                                            <input type="number" id="o3Input" value="60" min="0" max="150"
+                                                class="value-input">
+                                        </div>
+                                    </div>
+
+                                    <div class="slider-control">
+                                        <label>CO <span class="unit">ppm</span></label>
+                                        <div class="slider-wrapper">
+                                            <input type="range" id="co" min="0" max="5" step="0.1" value="1.2"
+                                                class="modern-slider">
+                                            <input type="number" id="coInput" value="1.2" min="0" max="5" step="0.1"
+                                                class="value-input">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="param-group">
+                                    <div class="param-header">
+                                        <i class="bi bi-cloud-sun"></i>
+                                        <span>Weather</span>
+                                    </div>
+
+                                    <div class="slider-control">
+                                        <label>Temperature <span class="unit">°C</span></label>
+                                        <div class="slider-wrapper">
+                                            <input type="range" id="temperature" min="-10" max="50" value="28"
+                                                class="modern-slider">
+                                            <input type="number" id="temperatureInput" value="28" min="-10" max="50"
+                                                class="value-input">
+                                        </div>
+                                    </div>
+
+                                    <div class="slider-control">
+                                        <label>Humidity <span class="unit">%</span></label>
+                                        <div class="slider-wrapper">
+                                            <input type="range" id="humidity" min="0" max="100" value="60"
+                                                class="modern-slider">
+                                            <input type="number" id="humidityInput" value="60" min="0" max="100"
+                                                class="value-input">
+                                        </div>
+                                    </div>
+
+                                    <div class="slider-control">
+                                        <label>Wind Speed <span class="unit">m/s</span></label>
+                                        <div class="slider-wrapper">
+                                            <input type="range" id="wind_speed" min="0" max="15" step="0.1" value="2.0"
+                                                class="modern-slider">
+                                            <input type="number" id="wind_speedInput" value="2.0" min="0" max="15"
+                                                step="0.1" class="value-input">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn-predict">
+                                    <span class="btn-text">Predict AQI</span>
+                                    <span class="btn-icon"><i class="bi bi-arrow-right"></i></span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-7" data-aos="fade-left">
+                        <div class="result-panel">
+                            <div id="loadingSpinner" class="loading-state d-none">
+                                <div class="spinner-modern"></div>
+                                <p>Analyzing air quality...</p>
+                            </div>
+
+                            <div id="resultContent" class="empty-state">
+                                <div class="empty-icon">
+                                    <i class="bi bi-cloud-haze"></i>
+                                </div>
+                                <h4>Ready to Predict</h4>
+                                <p>Adjust parameters and click "Predict AQI"</p>
+                            </div>
+
+                            <div id="predictionResult" class="d-none">
+                                <div class="result-header">
+                                    <div class="result-badge">Prediction Result</div>
+                                </div>
+
+                                <div class="aqi-result">
+                                    <div class="aqi-circle">
+                                        <svg class="progress-ring" width="200" height="200">
+                                            <circle class="progress-ring-bg" cx="100" cy="100" r="90"></circle>
+                                            <circle class="progress-ring-fill" cx="100" cy="100" r="90"
+                                                id="progressCircle"></circle>
+                                        </svg>
+                                        <div class="aqi-center">
+                                            <div class="aqi-value-large" id="aqiValue">0</div>
+                                            <div class="aqi-label-small">AQI</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="aqi-info">
+                                        <div class="category-badge" id="categoryBadge">
+                                            <i id="categoryIcon"></i>
+                                            <span id="categoryName">Category</span>
+                                        </div>
+                                        <div class="advice-card" id="adviceCard">
+                                            <i class="bi bi-info-circle"></i>
+                                            <p id="adviceText">Health advisory will appear here</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="aqi-scale-new">
+                                    <div class="scale-track">
+                                        <div class="scale-marker" id="aqiMarker"></div>
+                                    </div>
+                                    <div class="scale-labels">
+                                        <span>0</span>
+                                        <span>50</span>
+                                        <span>100</span>
+                                        <span>150</span>
+                                        <span>200</span>
+                                        <span>300</span>
+                                        <span>500</span>
+                                    </div>
+                                </div>
+
+                                <div class="result-actions">
+                                    <button class="action-btn-modern" onclick="showDetailedRecommendations()">
+                                        <i class="bi bi-list-check"></i>
+                                        <span>Recommendations</span>
+                                    </button>
+                                    <button class="action-btn-modern" onclick="saveResult()">
+                                        <i class="bi bi-bookmark"></i>
+                                        <span>Save Result</span>
+                                    </button>
+                                    <button class="action-btn-modern" onclick="shareResult()">
+                                        <i class="bi bi-share"></i>
+                                        <span>Share</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Global Map Section -->
+    <section id="map" class="section-modern">
+        <div class="container-fluid">
+            <div class="section-header" data-aos="fade-up">
+                <div class="section-badge">
+                    <i class="bi bi-globe2"></i>
+                    <span>Global Coverage</span>
+                </div>
+                <h2 class="section-title">Worldwide Air Quality Map</h2>
+                <p class="section-subtitle">Real-time monitoring across major cities</p>
+            </div>
+
+            <div class="map-wrapper" data-aos="fade-up" data-aos-delay="200">
+                <div id="airQualityMap" class="modern-map"></div>
+                <div class="map-legend">
+                    <div class="legend-item">
+                        <span class="legend-dot good"></span>
+                        <span>Good (0-50)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot moderate"></span>
+                        <span>Moderate (51-100)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot unhealthy"></span>
+                        <span>Unhealthy (101-200)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot hazardous"></span>
+                        <span>Hazardous (200+)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Analytics Section -->
+    <section id="analytics" class="section-modern section-dark">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <div class="section-badge">
+                    <i class="bi bi-bar-chart"></i>
+                    <span>Analytics</span>
+                </div>
+                <h2 class="section-title">Performance Insights</h2>
+                <p class="section-subtitle">Model metrics and data analysis</p>
+            </div>
+
+            <div class="stats-grid" id="statsCards">
+                <div class="stat-card-modern" data-aos="fade-up" data-aos-delay="100">
+                    <div class="stat-icon-modern gradient-purple">
+                        <i class="bi bi-database"></i>
+                    </div>
+                    <div class="stat-details">
+                        <div class="stat-value-modern">--</div>
+                        <div class="stat-label-modern">Training Records</div>
+                    </div>
+                </div>
+
+                <div class="stat-card-modern" data-aos="fade-up" data-aos-delay="200">
+                    <div class="stat-icon-modern gradient-blue">
+                        <i class="bi bi-graph-up"></i>
+                    </div>
+                    <div class="stat-details">
+                        <div class="stat-value-modern">--</div>
+                        <div class="stat-label-modern">Average AQI</div>
+                    </div>
+                </div>
+
+                <div class="stat-card-modern" data-aos="fade-up" data-aos-delay="300">
+                    <div class="stat-icon-modern gradient-green">
+                        <i class="bi bi-bullseye"></i>
+                    </div>
+                    <div class="stat-details">
+                        <div class="stat-value-modern">--</div>
+                        <div class="stat-label-modern">Accuracy</div>
+                    </div>
+                </div>
+
+                <div class="stat-card-modern" data-aos="fade-up" data-aos-delay="400">
+                    <div class="stat-icon-modern gradient-orange">
+                        <i class="bi bi-speedometer2"></i>
+                    </div>
+                    <div class="stat-details">
+                        <div class="stat-value-modern">--</div>
+                        <div class="stat-label-modern">R² Score</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mt-4">
+                <div class="col-lg-6" data-aos="fade-up">
+                    <div class="analytics-card">
+                        <div class="card-header-modern">
+                            <i class="bi bi-bar-chart-fill"></i>
+                            <span>Feature Importance</span>
+                        </div>
+                        <div class="card-body-modern" id="featureImportanceChart">
+                            <div class="loading-skeleton"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6" data-aos="fade-up">
+                    <div class="analytics-card">
+                        <div class="card-header-modern">
+                            <i class="bi bi-pie-chart-fill"></i>
+                            <span>AQI Distribution</span>
+                        </div>
+                        <div class="card-body-modern" id="aqiDistributionChart">
+                            <div class="loading-skeleton"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="export-section" data-aos="fade-up">
+                <h3>Export Data</h3>
+                <div class="export-buttons">
+                    <button class="export-btn" onclick="exportData('csv')">
+                        <i class="bi bi-file-earmark-spreadsheet"></i>
+                        <span>Export CSV</span>
+                    </button>
+                    <button class="export-btn" onclick="exportData('json')">
+                        <i class="bi bi-file-earmark-code"></i>
+                        <span>Export JSON</span>
+                    </button>
+                    <button class="export-btn" onclick="generateReport()">
+                        <i class="bi bi-file-earmark-pdf"></i>
+                        <span>Generate Report</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer-ultra-modern">
+        <div class="footer-gradient-bg"></div>
+        <div class="container">
+            <!-- Main Footer Content -->
+            <div class="footer-main">
+                <div class="row g-4">
+                    <!-- Brand Section -->
+                    <div class="col-lg-4" data-aos="fade-up">
+                        <div class="footer-brand-section">
+                            <div class="footer-logo">
+                                <div class="logo-icon-footer">
+                                    <i class="bi bi-wind"></i>
+                                </div>
+                                <div class="logo-text-footer">
+                                    <h3>BreatheSafe<span class="gradient-text">AI</span></h3>
+                                </div>
+                            </div>
+                            <p class="footer-description">
+                                Next-generation air quality monitoring platform powered by advanced AI.
+                                Real-time insights for healthier living.
+                            </p>
+                            <div class="footer-stats-mini">
+                                <div class="mini-stat">
+                                    <div class="mini-stat-value">95%</div>
+                                    <div class="mini-stat-label">Accuracy</div>
+                                </div>
+                                <div class="mini-stat">
+                                    <div class="mini-stat-value">10+</div>
+                                    <div class="mini-stat-label">Cities</div>
+                                </div>
+                                <div class="mini-stat">
+                                    <div class="mini-stat-value">24/7</div>
+                                    <div class="mini-stat-label">Live</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Links -->
+                    <div class="col-lg-2 col-md-4 col-6" data-aos="fade-up" data-aos-delay="100">
+                        <div class="footer-column">
+                            <h4 class="footer-heading">Platform</h4>
+                            <ul class="footer-links-list">
+                                <li><a href="#monitor"><i class="bi bi-chevron-right"></i>Real-Time Monitor</a></li>
+                                <li><a href="#predict"><i class="bi bi-chevron-right"></i>AI Predictor</a></li>
+                                <li><a href="#map"><i class="bi bi-chevron-right"></i>Global Map</a></li>
+                                <li><a href="#analytics"><i class="bi bi-chevron-right"></i>Analytics</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Resources -->
+                    <div class="col-lg-2 col-md-4 col-6" data-aos="fade-up" data-aos-delay="200">
+                        <div class="footer-column">
+                            <h4 class="footer-heading">Resources</h4>
+                            <ul class="footer-links-list">
+                                <li><a href="#"><i class="bi bi-chevron-right"></i>Documentation</a></li>
+                                <li><a href="#"><i class="bi bi-chevron-right"></i>API Reference</a></li>
+                                <li><a href="#"><i class="bi bi-chevron-right"></i>Support</a></li>
+                                <li><a href="#"><i class="bi bi-chevron-right"></i>Blog</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Newsletter & Social -->
+                    <div class="col-lg-4 col-md-4" data-aos="fade-up" data-aos-delay="300">
+                        <div class="footer-column">
+                            <h4 class="footer-heading">Stay Updated</h4>
+                            <p class="newsletter-text">Get the latest air quality insights and updates.</p>
+                            <form class="newsletter-form" onsubmit="subscribeNewsletter(event)">
+                                <div class="input-group-newsletter">
+                                    <input type="email" placeholder="Enter your email" required>
+                                    <button type="submit">
+                                        <i class="bi bi-send"></i>
+                                    </button>
+                                </div>
+                            </form>
+
+                            <div class="social-section">
+                                <h5 class="social-heading">Connect With Us</h5>
+                                <div class="social-links-footer">
+                                    <a href="https://github.com/Ankit2006Raj" target="_blank" class="social-btn"
+                                        title="GitHub">
+                                        <i class="bi bi-github"></i>
+                                    </a>
+                                    <a href="https://www.linkedin.com/in/ankit-raj-226a36309" target="_blank"
+                                        class="social-btn" title="LinkedIn">
+                                        <i class="bi bi-linkedin"></i>
+                                    </a>
+                                    <a href="mailto:ankit9905163014@gmail.com" class="social-btn" title="Email">
+                                        <i class="bi bi-envelope-fill"></i>
+                                    </a>
+                                    <a href="#" class="social-btn" title="Twitter">
+                                        <i class="bi bi-twitter"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Bottom -->
+            <div class="footer-bottom-modern">
+                <div class="footer-bottom-content">
+                    <div class="copyright-section">
+                        <p>&copy; 2024 BreatheSafe AI. All rights reserved.</p>
+                        <p class="made-with">
+                            Crafted with <i class="bi bi-heart-fill heart-beat"></i> by
+                            <a href="https://github.com/Ankit2006Raj" target="_blank" class="author-link">Ankit Raj</a>
+                        </p>
+                    </div>
+
+                    <div class="footer-badges-section">
+                        <span class="tech-badge-footer">
+                            <i class="bi bi-cpu"></i> AI Powered
+                        </span>
+                        <span class="tech-badge-footer">
+                            <i class="bi bi-broadcast"></i> Real-Time
+                        </span>
+                        <span class="tech-badge-footer">
+                            <i class="bi bi-code-slash"></i> Open Source
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Back to Top Button -->
+            <button class="back-to-top" id="backToTop" onclick="scrollToTop()">
+                <i class="bi bi-arrow-up"></i>
+            </button>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <div class="modal fade" id="recommendationsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content modal-modern">
+                <div class="modal-header-modern">
+                    <h5><i class="bi bi-list-check me-2"></i>Health Recommendations</h5>
+                    <button type="button" class="btn-close-modern" data-bs-dismiss="modal">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+                <div class="modal-body-modern" id="recommendationsContent">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="alertModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content modal-modern">
+                <div class="modal-header-modern">
+                    <h5><i class="bi bi-bell me-2"></i>Set AQI Alert</h5>
+                    <button type="button" class="btn-close-modern" data-bs-dismiss="modal">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+                <div class="modal-body-modern">
+                    <form id="alertForm">
+                        <div class="form-group-modern">
+                            <label>Alert Threshold</label>
+                            <input type="number" class="input-modern" id="alertThreshold" value="100" min="0" max="500">
+                            <small>Get notified when AQI exceeds this value</small>
+                        </div>
+                        <div class="form-group-modern">
+                            <label>Email (Optional)</label>
+                            <input type="email" class="input-modern" id="alertEmail" placeholder="your@email.com">
+                        </div>
+                        <button type="submit" class="btn-primary-modern w-100">
+                            <span>Set Alert</span>
+                            <i class="bi bi-check"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>AOS.init({ duration: 800, once: true });</script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+
+</html>
