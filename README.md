@@ -434,3 +434,4 @@ For support, email ankit9905163014@gmail.com or open an issue on GitHub.
 
 Made with ❤️ for cleaner air and healthier communities
 "# BreatheSafe" 
+"# BreatheSafe-AI" 
