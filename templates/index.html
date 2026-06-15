@@ -496,10 +496,22 @@ ero Section -->
                     <span>Global Coverage</span>
                 </div>
                 <h2 class="section-title">Worldwide Air Quality Map</h2>
-                <p class="section-subtitle">Real-time monitoring across major cities</p>
+                <p class="section-subtitle">Real-time monitoring across any location worldwide</p>
             </div>
 
-            <div class="map-wrapper" data-aos="fade-up" data-aos-delay="200">
+            <div class="map-wrapper" data-aos="fade-up" data-aos-delay="200" style="position: relative;">
+                <div class="map-search-overlay">
+                    <div class="map-search-container">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                            <input type="text" id="mapSearchInput" class="form-control border-start-0" placeholder="Search any city worldwide...">
+                            <button class="btn btn-primary" type="button" id="mapSearchBtn">Search</button>
+                        </div>
+                    </div>
+                    <button class="btn btn-light shadow-sm locate-me-btn" id="locateMeBtn" title="Locate Me">
+                        <i class="bi bi-geo-alt-fill text-primary"></i>
+                    </button>
+                </div>
                 <div id="airQualityMap" class="modern-map"></div>
                 <div class="map-legend">
                     <div class="legend-item">

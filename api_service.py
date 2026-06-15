@@ -286,7 +286,7 @@ class WeatherAPIService:
         return conversion.get(ow_aqi, 0)
     
     def get_city_coordinates(self, city: str) -> Optional[tuple]:
-        """Get coordinates for a city name"""
+        """Get coordinates for a city name, using Geocoding API if not cached"""
         city_coords = {
             'New York': (40.7128, -74.0060),
             'Los Angeles': (34.0522, -118.2437),
@@ -304,7 +304,33 @@ class WeatherAPIService:
             'Shanghai': (31.2304, 121.4737),
             'Moscow': (55.7558, 37.6173)
         }
-        return city_coords.get(city)
+        
+        # Check hardcoded list first
+        if city in city_coords:
+            return city_coords[city]
+            
+        # If not in hardcoded list and we have the API key, use Geocoding API
+        if self.openweather_key:
+            try:
+                url = "http://api.openweathermap.org/geo/1.0/direct"
+                params = {
+                    'q': city,
+                    'limit': 1,
+                    'appid': self.openweather_key
+                }
+                response = requests.get(url, params=params, timeout=10)
+                response.raise_for_status()
+                data = response.json()
+                
+                if data and len(data) > 0:
+                    lat = data[0]['lat']
+                    lon = data[0]['lon']
+                    logger.info(f"Geocoded {city} to {lat}, {lon}")
+                    return (lat, lon)
+            except Exception as e:
+                logger.error(f"Error geocoding city {city}: {e}")
+                
+        return None
 
 
 # Global instance

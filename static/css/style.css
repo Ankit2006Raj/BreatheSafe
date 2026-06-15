@@ -3160,3 +3160,101 @@ body.light-mode .ai-list li {
         transform: scale(1);
     }
 }
+
+/* Map Search UI */
+.map-search-overlay {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: flex;
+    gap: 10px;
+    width: 90%;
+    max-width: 500px;
+}
+
+.map-search-container {
+    flex-grow: 1;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    background: #fff;
+}
+
+.map-search-container .input-group {
+    background: transparent;
+    border-radius: 8px;
+}
+
+.map-search-container input {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 12px 15px;
+    font-size: 1rem;
+    color: #333;
+}
+
+.map-search-container input:focus {
+    box-shadow: none;
+    outline: none;
+}
+
+.locate-me-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.locate-me-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.leaflet-popup-content-wrapper {
+    background: rgba(30, 41, 59, 0.95);
+    color: #fff;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+}
+
+body.light-mode .leaflet-popup-content-wrapper {
+    background: rgba(255, 255, 255, 0.95);
+    color: #333;
+}
+
+.map-popup {
+    text-align: center;
+    padding: 5px;
+}
+
+.map-popup-location {
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+    text-transform: capitalize;
+}
+
+.map-popup-aqi {
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1;
+    margin: 10px 0;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.map-popup-details {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+    font-size: 0.85rem;
+    opacity: 0.9;
+}

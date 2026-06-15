@@ -278,13 +278,130 @@ function initializeMap() {
 
     map = L.map('airQualityMap').setView([20, 0], 2);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-        maxZoom: 18
+    // Modern dark theme map
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 20
     }).addTo(map);
 
-    // Load locations
+    // Load initial locations
     loadMapLocations();
+
+    // Map Click Event
+    map.on('click', async function(e) {
+        fetchAndDisplayLocationData(e.latlng.lat, e.latlng.lng, "Selected Location");
+    });
+
+    // Search functionality
+    const searchBtn = document.getElementById('mapSearchBtn');
+    const searchInput = document.getElementById('mapSearchInput');
+    
+    if (searchBtn && searchInput) {
+        searchBtn.addEventListener('click', () => searchLocation(searchInput.value));
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchLocation(searchInput.value);
+        });
+    }
+
+    // Locate Me functionality
+    const locateBtn = document.getElementById('locateMeBtn');
+    if (locateBtn) {
+        locateBtn.addEventListener('click', () => {
+            if (navigator.geolocation) {
+                const icon = locateBtn.querySelector('i');
+                icon.className = 'spinner-border spinner-border-sm text-primary';
+                
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        icon.className = 'bi bi-geo-alt-fill text-primary';
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        fetchAndDisplayLocationData(lat, lng, "Your Location");
+                    },
+                    (error) => {
+                        icon.className = 'bi bi-geo-alt-fill text-primary';
+                        showNotification('Geolocation failed or denied', 'warning');
+                    }
+                );
+            } else {
+                showNotification('Geolocation is not supported by this browser', 'warning');
+            }
+        });
+    }
+}
+
+async function searchLocation(city) {
+    if (!city) return;
+    const btn = document.getElementById('mapSearchBtn');
+    if(btn) {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        
+        try {
+            const geoResponse = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(city)}`);
+            const geoData = await geoResponse.json();
+            
+            if (geoData && geoData.length > 0) {
+                const lat = parseFloat(geoData[0].lat);
+                const lng = parseFloat(geoData[0].lon);
+                const displayName = geoData[0].display_name.split(',')[0];
+                
+                fetchAndDisplayLocationData(lat, lng, displayName);
+            } else {
+                showNotification('City not found', 'warning');
+            }
+        } catch (error) {
+            showNotification('Error searching location', 'danger');
+        } finally {
+            btn.innerHTML = originalText;
+        }
+    }
+}
+
+async function fetchAndDisplayLocationData(lat, lng, locationName) {
+    try {
+        const response = await fetch(`/api/air-quality/coordinates?lat=${lat}&lon=${lng}`);
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+            const data = result.data;
+            const aqi = data.aqi;
+            const color = getAQIColor(aqi);
+            
+            // Fly to location
+            map.flyTo([lat, lng], 10, { duration: 1.5 });
+            
+            // Add marker
+            const marker = L.circleMarker([lat, lng], {
+                radius: 12,
+                fillColor: color,
+                color: '#fff',
+                weight: 2,
+                opacity: 1,
+                fillOpacity: 0.8
+            }).addTo(map);
+            
+            marker.bindPopup(`
+                <div class="map-popup">
+                    <div class="map-popup-location">${locationName}</div>
+                    <div class="map-popup-aqi" style="color: ${color}">${aqi}</div>
+                    <div class="text-muted">AQI</div>
+                    <div class="map-popup-details">
+                        <span><i class="bi bi-thermometer-half"></i> ${data.temperature || '--'}°C</span>
+                        <span><i class="bi bi-droplet"></i> ${data.humidity || '--'}%</span>
+                    </div>
+                </div>
+            `).openPopup();
+            
+            markers.push(marker);
+        } else {
+            showNotification('Air quality data unavailable for this location', 'warning');
+        }
+    } catch (error) {
+        console.error('Error fetching location data:', error);
+        showNotification('Error fetching air quality data', 'danger');
+    }
 }
 
 // Load map locations

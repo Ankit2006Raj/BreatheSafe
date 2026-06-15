@@ -408,6 +408,25 @@ def get_realtime_city_data(city):
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
+@app.route('/api/air-quality/coordinates')
+def get_air_quality_by_coords():
+    """Get air quality for specific coordinates"""
+    try:
+        lat = float(request.args.get('lat', 0))
+        lon = float(request.args.get('lon', 0))
+        
+        if not lat or not lon:
+            return jsonify({'error': 'Missing coordinates'}), 400
+            
+        data = api_service.get_combined_data(lat, lon, f"Location ({lat:.2f}, {lon:.2f})")
+        
+        return jsonify({
+            'success': True,
+            'data': data
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
 @app.route('/api/check-api-status')
 def check_api_status():
     """Check if API keys are configured"""
