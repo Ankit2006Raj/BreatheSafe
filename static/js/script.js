@@ -633,7 +633,13 @@ async function loadStatistics() {
         const response = await fetch('/stats');
         const stats = await response.json();
 
-        document.getElementById('modelAccuracy').textContent = stats.model_metrics.accuracy + '% Accurate';
+        document.getElementById('modelAccuracy').textContent = stats.model_metrics.accuracy + '%';
+        if (document.getElementById('subtitleAccuracy')) {
+            document.getElementById('subtitleAccuracy').textContent = stats.model_metrics.accuracy + '%';
+        }
+        if (document.getElementById('footerAccuracy')) {
+            document.getElementById('footerAccuracy').textContent = stats.model_metrics.accuracy + '%';
+        }
         displayStatsCards(stats);
         displayFeatureImportance(stats.feature_importance);
         displayAQIDistribution(stats.aqi_distribution);
