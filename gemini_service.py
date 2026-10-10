@@ -182,41 +182,62 @@ Keep response concise and actionable (max 150 words).
     
     def get_personalized_advice(self, aqi: float, user_profile: Dict) -> Dict:
         """
-        Get personalized advice based on user profile
-        user_profile: {age_group, health_conditions, activity_level, location}
+        Get personalized advice based on user demographic & health persona
+        user_profile: {persona_id, age_group, health_conditions, activity_level, location}
         """
-        if not self.model:
-            return {'advice': 'Please configure Gemini API for personalized advice', 'source': 'Fallback'}
+        persona = user_profile.get('persona_id', 'general')
         
-        try:
-            age_group = user_profile.get('age_group', 'adult')
-            health_conditions = user_profile.get('health_conditions', [])
-            activity_level = user_profile.get('activity_level', 'moderate')
-            
-            prompt = f"""
-Provide personalized air quality advice for:
+        # Calculate dynamic Risk Index score (0-100) based on persona multiplier & AQI
+        persona_multipliers = {
+            'athlete': 1.15,
+            'children': 1.30,
+            'asthmatic': 1.45,
+            'elderly': 1.40,
+            'commuter': 1.05,
+            'general': 1.00
+        }
+        mult = persona_multipliers.get(persona, 1.0)
+        risk_score = min(100, round((aqi / 300.0) * 100 * mult))
+        
+        if self.model:
+            try:
+                prompt = f"""
+You are a preventive pulmonologist and environmental health expert.
+Provide concise, structured personalized guidance for this individual:
 
-Current AQI: {aqi}
-Age Group: {age_group}
-Health Conditions: {', '.join(health_conditions) if health_conditions else 'None reported'}
-Activity Level: {activity_level}
+- Demographic Persona: {persona.upper()}
+- Current AQI: {aqi}
+- Health Conditions: {', '.join(user_profile.get('health_conditions', [])) or 'Standard sensitivity'}
+- Activity Level: {user_profile.get('activity_level', 'Moderate')}
 
-Give specific, personalized recommendations (3-5 bullet points) considering their profile.
-Be empathetic and practical.
+Provide 4 practical bullet points:
+1. Outdoor Activity Risk & Time Limits
+2. Breathing & Respiratory Precautions
+3. Indoor Filtration & Protective Gear (N95, HEPA)
+4. Red Flag Symptoms to Monitor
+
+Keep response highly focused and empathetic under 120 words.
 """
-            
-            response = self.model.generate_content(prompt)
-            
-            return {
-                'advice': response.text,
-                'personalized': True,
-                'source': 'Gemini AI',
-                'timestamp': datetime.now().isoformat()
-            }
-            
-        except Exception as e:
-            logger.error(f"Error getting personalized advice: {e}")
-            return {'advice': 'Unable to generate personalized advice', 'source': 'Error'}
+                response = self.model.generate_content(prompt)
+                return {
+                    'advice': response.text,
+                    'risk_score': risk_score,
+                    'persona': persona,
+                    'personalized': True,
+                    'source': 'Gemini AI',
+                    'timestamp': datetime.now().isoformat()
+                }
+            except Exception as e:
+                logger.error(f"Gemini API error during personalized advice: {e}")
+
+        return {
+            'advice': f"Personalized guidance active for {persona}. Risk index: {risk_score}/100.",
+            'risk_score': risk_score,
+            'persona': persona,
+            'personalized': True,
+            'source': 'Fallback',
+            'timestamp': datetime.now().isoformat()
+        }
     
     def explain_aqi_simply(self, aqi: float, pm25: float) -> str:
         """
