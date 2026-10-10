@@ -1422,3 +1422,101 @@ function removeScenario(id) {
     studioScenarios = studioScenarios.filter(s => s.id !== id);
     renderScenarioCards();
 }
+
+const scenarioBatches = {
+    urban_shift: [
+        { id: 1, name: 'Baseline City Average', icon: 'bi-buildings', pm25: 55, pm10: 85, no2: 38, o3: 50, co: 1.1, temperature: 24, humidity: 55, wind_speed: 3.0 },
+        { id: 2, name: 'Rush Hour Congestion', icon: 'bi-car-front-fill', pm25: 110, pm10: 175, no2: 88, o3: 42, co: 3.2, temperature: 26, humidity: 62, wind_speed: 1.2 },
+        { id: 3, name: 'Green Urban Park Belt', icon: 'bi-tree-fill', pm25: 18, pm10: 32, no2: 12, o3: 35, co: 0.4, temperature: 21, humidity: 60, wind_speed: 4.5 }
+    ],
+    climate_events: [
+        { id: 1, name: 'Normal Standard Day', icon: 'bi-sun', pm25: 35, pm10: 55, no2: 22, o3: 45, co: 0.8, temperature: 22, humidity: 50, wind_speed: 3.5 },
+        { id: 2, name: 'Wildfire Smoke Inflow', icon: 'bi-fire', pm25: 240, pm10: 320, no2: 65, o3: 95, co: 4.5, temperature: 32, humidity: 30, wind_speed: 1.8 },
+        { id: 3, name: 'Coastal Sea Breeze', icon: 'bi-water', pm25: 12, pm10: 20, no2: 8, o3: 28, co: 0.2, temperature: 19, humidity: 75, wind_speed: 6.2 }
+    ],
+    policy_impact: [
+        { id: 1, name: 'Current Industrial Mix', icon: 'bi-factory', pm25: 95, pm10: 140, no2: 58, o3: 65, co: 2.4, temperature: 25, humidity: 58, wind_speed: 2.1 },
+        { id: 2, name: '100% EV & Zero Emission', icon: 'bi-lightning-charge-fill', pm25: 22, pm10: 38, no2: 9, o3: 32, co: 0.3, temperature: 23, humidity: 52, wind_speed: 3.0 },
+        { id: 3, name: 'Heavy Smog Inversion', icon: 'bi-cloud-haze2-fill', pm25: 195, pm10: 290, no2: 90, o3: 110, co: 3.8, temperature: 14, humidity: 85, wind_speed: 0.6 }
+    ]
+};
+
+function initScenarioStudio() {
+    loadScenarioBatch('urban_shift');
+}
+
+function loadScenarioBatch(batchKey) {
+    if (!scenarioBatches[batchKey]) return;
+    
+    document.querySelectorAll('.preset-pill-btn').forEach(btn => btn.classList.remove('active'));
+    const clickedBtn = Array.from(document.querySelectorAll('.preset-pill-btn')).find(b => b.getAttribute('onclick')?.includes(batchKey));
+    if (clickedBtn) clickedBtn.classList.add('active');
+
+    studioScenarios = JSON.parse(JSON.stringify(scenarioBatches[batchKey]));
+    renderScenarioCards();
+    runScenarioComparison();
+}
+
+async function runScenarioComparison() {
+    const panel = document.getElementById('scenarioResultsPanel');
+    const scoreContainer = document.getElementById('scenarioScoreCards');
+    if (!panel || !scoreContainer) return;
+
+    panel.classList.remove('d-none');
+    scoreContainer.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div><p class="mt-2 text-muted">Running comparative machine learning inference...</p></div>';
+
+    try {
+        const response = await fetch('/api/compare', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ scenarios: studioScenarios })
+        });
+
+        const data = await response.json();
+        if (data.success && data.results) {
+            renderScenarioResultCards(data.results);
+            if (typeof renderScenarioComparisonChart === 'function') renderScenarioComparisonChart(data.results);
+            if (typeof renderScenarioInsights === 'function') renderScenarioInsights(data.results);
+        } else {
+            scoreContainer.innerHTML = `<div class="alert alert-danger">${data.error || 'Failed to compare scenarios'}</div>`;
+        }
+    } catch (err) {
+        console.error('Error running scenario comparison:', err);
+        scoreContainer.innerHTML = '<div class="alert alert-danger">Error connecting to scenario comparison engine</div>';
+    }
+}
+
+function renderScenarioResultCards(results) {
+    const container = document.getElementById('scenarioScoreCards');
+    if (!container) return;
+
+    container.innerHTML = results.map((res, idx) => {
+        const isBaseline = idx === 0;
+        let deltaBadge = '';
+        if (isBaseline) {
+            deltaBadge = '<span class="sc-delta-badge baseline">Baseline Reference</span>';
+        } else if (res.delta_aqi < 0) {
+            deltaBadge = `<span class="sc-delta-badge better"><i class="bi bi-arrow-down-short"></i> ${Math.abs(res.delta_aqi)} AQI Cleaner</span>`;
+        } else {
+            deltaBadge = `<span class="sc-delta-badge worse"><i class="bi bi-arrow-up-short"></i> +${res.delta_aqi} AQI Worse</span>`;
+        }
+
+        return `
+            <div class="col-md-${12 / Math.min(results.length, 4)}">
+                <div class="scenario-score-card h-100" style="border-top: 4px solid ${res.color}">
+                    <div class="scenario-score-head">
+                        <span class="sc-name">${res.name}</span>
+                        ${deltaBadge}
+                    </div>
+                    <div class="sc-aqi-num" style="color: ${res.color}">${res.aqi}</div>
+                    <div class="category-badge-mini" style="color: ${res.color}; font-weight: 700; font-size: 0.85rem;">
+                        ${res.category}
+                    </div>
+                    <div class="sc-dominant-tag">
+                        <i class="bi bi-exclamation-triangle me-1"></i> Key Driver: <strong>${res.dominant_pollutant}</strong> (${res.dominant_ratio}% WHO limit)
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
