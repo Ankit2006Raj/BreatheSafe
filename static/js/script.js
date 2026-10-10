@@ -1593,3 +1593,229 @@ function renderScenarioInsights(results) {
         </div>
     `;
 }
+
+// ========================================
+// HEALTH PERSONAS & CLINICAL RISK ADVISOR
+// ========================================
+
+let currentPersona = 'athlete';
+const personaConfigs = {
+    athlete: {
+        title: 'Outdoor Athlete & Runner',
+        badge: 'ATHLETE PROTOCOL',
+        icon: 'bi-person-walking',
+        color: '#f97316',
+        multiplier: 1.15,
+        outdoorLimit: { good: 'Unlimited', moderate: '2 - 3 Hours', unhealthy_sens: '45 Mins Max', severe: 'Zero (Stay Indoor)' },
+        maskProtocol: { good: 'Not Needed', moderate: 'Optional', unhealthy_sens: 'N95 for Walking', severe: 'N95 / FFP2 Required' },
+        indoorPurifier: { good: 'Optional', moderate: 'Recommended', unhealthy_sens: 'HEPA Active', severe: 'True-HEPA High Speed' },
+        checklist: [
+            'Deep ventilation during tempo runs multiplies particulate inhalation by up to 10x.',
+            'Schedule outdoor runs before 9:00 AM or after sunset to avoid peak photochemical smog.',
+            'Maintain optimal hydration to protect respiratory epithelial barrier.',
+            'Substitute outdoor road cycling with indoor stationary trainer on polluted days.'
+        ]
+    },
+    children: {
+        title: 'Children & School Students',
+        badge: 'PEDIATRIC PROTOCOL',
+        icon: 'bi-backpack',
+        color: '#10b981',
+        multiplier: 1.30,
+        outdoorLimit: { good: 'Unlimited', moderate: 'Full Recess Safe', unhealthy_sens: '15 - 20 Mins', severe: 'Indoor Only' },
+        maskProtocol: { good: 'Not Needed', moderate: 'Not Needed', unhealthy_sens: 'Child-size KN95', severe: 'Strict Pediatric Mask' },
+        indoorPurifier: { good: 'Not Critical', moderate: 'Classroom HEPA', unhealthy_sens: 'Run Continuously', severe: 'Sealed Clean Air Zone' },
+        checklist: [
+            'Children breathe more air per pound of body weight than adults, increasing toxicity intake.',
+            'Check that school athletic and playground activities adhere to AQI safety flags.',
+            'Students with childhood asthma should keep peak-flow meters and inhalers accessible.',
+            'Ensure school ventilation filters (MERV 13 or HEPA) are operating at full capacity.'
+        ]
+    },
+    asthmatic: {
+        title: 'Asthmatic & Respiratory Sensitive',
+        badge: 'PULMONARY PROTOCOL',
+        icon: 'bi-lungs',
+        color: '#8b5cf6',
+        multiplier: 1.45,
+        outdoorLimit: { good: 'Safe', moderate: '1 Hour Limit', unhealthy_sens: 'Under 15 Mins', severe: 'Strictly Prohibited' },
+        maskProtocol: { good: 'Not Needed', moderate: 'Carry Mask', unhealthy_sens: 'N95 Sealed', severe: 'N99 / Double Filter' },
+        indoorPurifier: { good: 'Standard Air', moderate: 'Bedroom HEPA', unhealthy_sens: 'All Rooms Filtered', severe: 'Medical Grade Cleanroom' },
+        checklist: [
+            'Elevated PM2.5 penetrates deep into lower bronchioles, triggering acute airway spasms.',
+            'Keep rescue bronchodilator (Albuterol) on hand before any required outdoor transit.',
+            'Avoid sudden shifts between cold outdoor air and heated indoor environments.',
+            'Seek immediate urgent care if experiencing wheezing, shortness of breath, or SpO2 < 94%.'
+        ]
+    },
+    elderly: {
+        title: 'Elderly & Cardiovascular Sensitive',
+        badge: 'CARDIAC PROTOCOL',
+        icon: 'bi-heart-pulse-fill',
+        color: '#3b82f6',
+        multiplier: 1.40,
+        outdoorLimit: { good: 'Unlimited', moderate: 'Light Walks Safe', unhealthy_sens: '30 Mins Max', severe: 'Stay Indoors' },
+        maskProtocol: { good: 'Not Needed', moderate: 'Optional', unhealthy_sens: 'N95 Recommended', severe: 'N95 Required' },
+        indoorPurifier: { good: 'Good', moderate: 'Living Area HEPA', unhealthy_sens: 'Active HEPA', severe: 'Continuous Filtration' },
+        checklist: [
+            'Fine particulates pass into the bloodstream, elevating arterial blood pressure and cardiac workload.',
+            'Avoid heavy physical strain or carrying groceries in stagnant, hazy weather.',
+            'Maintain strict timing for daily cardiovascular and hypertension medications.',
+            'Consult your physician if you notice unusual fatigue, chest discomfort, or dizziness.'
+        ]
+    },
+    commuter: {
+        title: 'Urban Commuter & Office Worker',
+        badge: 'COMMUTER PROTOCOL',
+        icon: 'bi-car-front-fill',
+        color: '#ec4899',
+        multiplier: 1.05,
+        outdoorLimit: { good: 'Unlimited', moderate: 'Standard Transit', unhealthy_sens: 'Limit Road Walking', severe: 'Minimize Transit' },
+        maskProtocol: { good: 'Not Needed', moderate: 'Subway/Bus Optional', unhealthy_sens: 'N95 for Platforms', severe: 'N95 During Entire Route' },
+        indoorPurifier: { good: 'Standard', moderate: 'Cabin Filter Active', unhealthy_sens: 'Recirculate Mode', severe: 'HEPA in Car & Office' },
+        checklist: [
+            'Switch vehicle HVAC air circulation to "Recirculate" to block tunnel and tailpipe fumes.',
+            'Avoid waiting at roadside bus stops during peak 8-10 AM and 5-7 PM rush hour jams.',
+            'Choose tree-lined secondary streets over high-density highway corridors for walking.',
+            'Wash face and rinse eyes after prolonged commuting through high particulate zones.'
+        ]
+    }
+};
+
+function initHealthPersonas() {
+    selectPersona('athlete');
+}
+
+function selectPersona(personaId) {
+    currentPersona = personaId;
+
+    // Update active tab UI
+    document.querySelectorAll('.persona-tab-card').forEach(tab => tab.classList.remove('active'));
+    const activeTab = document.getElementById(`persona-${personaId}`);
+    if (activeTab) activeTab.classList.add('active');
+
+    // Update headings and badge
+    const cfg = personaConfigs[personaId];
+    if (!cfg) return;
+
+    const heading = document.getElementById('healthPersonaHeading');
+    const badge = document.getElementById('personaActiveBadge');
+    if (heading) heading.textContent = `${cfg.title} Clinical Advisory`;
+    if (badge) badge.textContent = cfg.badge;
+
+    updateHealthDashboard(currentAQI || 65);
+}
+
+function updateHealthDashboard(aqi) {
+    const cfg = personaConfigs[currentPersona];
+    if (!cfg) return;
+
+    const currentAqiEl = document.getElementById('healthCurrentAqi');
+    if (currentAqiEl) currentAqiEl.textContent = Math.round(aqi);
+
+    // Calculate dynamic risk score (0-100)
+    const riskScore = Math.min(100, Math.round((aqi / 300) * 100 * cfg.multiplier));
+    const riskScoreEl = document.getElementById('healthRiskScore');
+    if (riskScoreEl) riskScoreEl.textContent = riskScore;
+
+    // Update circular SVG gauge
+    const meterFill = document.getElementById('healthRiskMeterFill');
+    if (meterFill) {
+        const circumference = 2 * Math.PI * 42; // ~263.89
+        const offset = circumference - (riskScore / 100) * circumference;
+        meterFill.style.strokeDashoffset = offset;
+
+        if (riskScore <= 30) meterFill.style.stroke = '#10b981';
+        else if (riskScore <= 60) meterFill.style.stroke = '#f59e0b';
+        else if (riskScore <= 80) meterFill.style.stroke = '#f97316';
+        else meterFill.style.stroke = '#ef4444';
+    }
+
+    // Determine condition key
+    let conditionKey = 'good';
+    let riskLevelText = 'LOW VULNERABILITY';
+    let riskLevelColor = '#10b981';
+
+    if (aqi <= 50) {
+        conditionKey = 'good';
+        riskLevelText = 'MINIMAL RISK';
+        riskLevelColor = '#10b981';
+    } else if (aqi <= 100) {
+        conditionKey = 'moderate';
+        riskLevelText = 'MODERATE SENSITIVITY';
+        riskLevelColor = '#f59e0b';
+    } else if (aqi <= 150) {
+        conditionKey = 'unhealthy_sens';
+        riskLevelText = 'HIGH VULNERABILITY';
+        riskLevelColor = '#f97316';
+    } else {
+        conditionKey = 'severe';
+        riskLevelText = 'CRITICAL HEALTH HAZARD';
+        riskLevelColor = '#ef4444';
+    }
+
+    const levelBadge = document.getElementById('healthRiskLevelBadge');
+    if (levelBadge) {
+        levelBadge.textContent = riskLevelText;
+        levelBadge.style.color = riskLevelColor;
+        levelBadge.style.borderColor = riskLevelColor;
+        levelBadge.style.background = `${riskLevelColor}22`;
+    }
+
+    // Quick stats
+    const limitEl = document.getElementById('healthOutdoorLimit');
+    const maskEl = document.getElementById('healthMaskProtocol');
+    const purifierEl = document.getElementById('healthIndoorPurifier');
+    if (limitEl) limitEl.textContent = cfg.outdoorLimit[conditionKey];
+    if (maskEl) maskEl.textContent = cfg.maskProtocol[conditionKey];
+    if (purifierEl) purifierEl.textContent = cfg.indoorPurifier[conditionKey];
+
+    // Render checklist
+    const checklistContainer = document.getElementById('healthChecklistContainer');
+    if (checklistContainer) {
+        checklistContainer.innerHTML = cfg.checklist.map(item => `
+            <div class="checklist-item">
+                <i class="bi bi-shield-check chk-icon"></i>
+                <p class="chk-text">${item}</p>
+            </div>
+        `).join('');
+    }
+}
+
+async function generateAiHealthPlan() {
+    const resultBox = document.getElementById('aiConsultResultBox');
+    const contentBox = document.getElementById('aiConsultContent');
+    if (!resultBox || !contentBox) return;
+
+    resultBox.classList.remove('d-none');
+    contentBox.innerHTML = '<div class="d-flex align-items-center gap-2"><div class="spinner-border spinner-border-sm text-primary"></div><span>Consulting BreatheSafe Clinical AI...</span></div>';
+
+    try {
+        const response = await fetch('/api/ai/personalized-advice', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                aqi: currentAQI || 65,
+                profile: {
+                    persona_id: currentPersona,
+                    activity_level: currentPersona === 'athlete' ? 'High' : 'Moderate',
+                    health_conditions: currentPersona === 'asthmatic' ? ['Asthma', 'Allergic rhinitis'] : []
+                }
+            })
+        });
+
+        const data = await response.json();
+        if (data.success && data.advice) {
+            contentBox.innerHTML = `
+                <div class="mb-2"><strong>${data.advice.persona_title || 'Personalized Health Plan'}</strong> (${data.advice.source || 'AI'})</div>
+                <div>${data.advice.advice.replace(/\n/g, '<br>')}</div>
+            `;
+        } else {
+            contentBox.textContent = 'Customized AI consultation generated via preventive health database.';
+        }
+    } catch (err) {
+        console.error('Error generating AI health plan:', err);
+        contentBox.textContent = 'Clinical recommendation: Follow standard persona checklist above.';
+    }
+}
+
