@@ -28,10 +28,6 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'breathesafe-secret-key-2024')
 app.config['JSON_SORT_KEYS'] = False
 
-# Configuration
-app.config['SECRET_KEY'] = 'breathesafe-secret-key-2024'
-app.config['JSON_SORT_KEYS'] = False
-
 # Global variables for model and data
 model = None
 df = None
