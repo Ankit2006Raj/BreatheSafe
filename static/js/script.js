@@ -38,6 +38,9 @@ document.addEventListener('DOMContentLoaded', function () {
     createParticles();
     setupAlertForm();
     checkPWAInstall();
+    initScenarioStudio();
+    initHealthPersonas();
+    initPollutantRadar();
 });
 
 // Initialize WebSocket connection
@@ -58,12 +61,18 @@ function initializeWebSocket() {
     socket.on('realtime_update', function (data) {
         console.log('Real-time update received:', data);
         updateRealtimeDisplay(data);
+        if (data.aqi) updateHealthDashboard(data.aqi);
+        updatePollutantRadar(data);
+        updateDominantPollutant(data);
     });
 
     socket.on('global_update', function (data) {
         console.log('Global update received:', data);
         updateHeroAQI(data.aqi);
         addChartData(data);
+        if (data.aqi) updateHealthDashboard(data.aqi);
+        updatePollutantRadar(data);
+        updateDominantPollutant(data);
 
         // Update real-time cards with global data
         if (data.pm25) animateValue('realtimePM25', data.pm25);
@@ -555,6 +564,16 @@ function displayPrediction(result) {
     if (result.aqi <= 50) {
         createConfetti();
     }
+
+    // Sync with Radar and Health modules
+    const formData = {};
+    parameters.forEach(param => {
+        const el = document.getElementById(param);
+        if (el) formData[param] = parseFloat(el.value);
+    });
+    updatePollutantRadar(formData);
+    updateDominantPollutant(formData);
+    updateHealthDashboard(result.aqi);
 
     predictionDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
@@ -1311,6 +1330,41 @@ document.addEventListener('DOMContentLoaded', function () {
 let studioScenarios = [];
 let scenarioComparisonChartInstance = null;
 
+const scenarioBatches = {
+    urban_shift: [
+        { id: 1, name: 'Baseline City Average', icon: 'bi-buildings', pm25: 55, pm10: 85, no2: 38, o3: 50, co: 1.1, temperature: 24, humidity: 55, wind_speed: 3.0 },
+        { id: 2, name: 'Rush Hour Congestion', icon: 'bi-car-front-fill', pm25: 110, pm10: 175, no2: 88, o3: 42, co: 3.2, temperature: 26, humidity: 62, wind_speed: 1.2 },
+        { id: 3, name: 'Green Urban Park Belt', icon: 'bi-tree-fill', pm25: 18, pm10: 32, no2: 12, o3: 35, co: 0.4, temperature: 21, humidity: 60, wind_speed: 4.5 }
+    ],
+    climate_events: [
+        { id: 1, name: 'Normal Standard Day', icon: 'bi-sun', pm25: 35, pm10: 55, no2: 22, o3: 45, co: 0.8, temperature: 22, humidity: 50, wind_speed: 3.5 },
+        { id: 2, name: 'Wildfire Smoke Inflow', icon: 'bi-fire', pm25: 240, pm10: 320, no2: 65, o3: 95, co: 4.5, temperature: 32, humidity: 30, wind_speed: 1.8 },
+        { id: 3, name: 'Coastal Sea Breeze', icon: 'bi-water', pm25: 12, pm10: 20, no2: 8, o3: 28, co: 0.2, temperature: 19, humidity: 75, wind_speed: 6.2 }
+    ],
+    policy_impact: [
+        { id: 1, name: 'Current Industrial Mix', icon: 'bi-factory', pm25: 95, pm10: 140, no2: 58, o3: 65, co: 2.4, temperature: 25, humidity: 58, wind_speed: 2.1 },
+        { id: 2, name: '100% EV & Zero Emission', icon: 'bi-lightning-charge-fill', pm25: 22, pm10: 38, no2: 9, o3: 32, co: 0.3, temperature: 23, humidity: 52, wind_speed: 3.0 },
+        { id: 3, name: 'Heavy Smog Inversion', icon: 'bi-cloud-haze2-fill', pm25: 195, pm10: 290, no2: 90, o3: 110, co: 3.8, temperature: 14, humidity: 85, wind_speed: 0.6 }
+    ]
+};
+
+function initScenarioStudio() {
+    loadScenarioBatch('urban_shift');
+}
+
+function loadScenarioBatch(batchKey) {
+    if (!scenarioBatches[batchKey]) return;
+    
+    // Update active pill button
+    document.querySelectorAll('.preset-pill-btn').forEach(btn => btn.classList.remove('active'));
+    const clickedBtn = Array.from(document.querySelectorAll('.preset-pill-btn')).find(b => b.getAttribute('onclick')?.includes(batchKey));
+    if (clickedBtn) clickedBtn.classList.add('active');
+
+    studioScenarios = JSON.parse(JSON.stringify(scenarioBatches[batchKey]));
+    renderScenarioCards();
+    runScenarioComparison();
+}
+
 function renderScenarioCards() {
     const container = document.getElementById('scenariosContainer');
     if (!container) return;
@@ -1421,45 +1475,13 @@ function removeScenario(id) {
     }
     studioScenarios = studioScenarios.filter(s => s.id !== id);
     renderScenarioCards();
-}
-
-const scenarioBatches = {
-    urban_shift: [
-        { id: 1, name: 'Baseline City Average', icon: 'bi-buildings', pm25: 55, pm10: 85, no2: 38, o3: 50, co: 1.1, temperature: 24, humidity: 55, wind_speed: 3.0 },
-        { id: 2, name: 'Rush Hour Congestion', icon: 'bi-car-front-fill', pm25: 110, pm10: 175, no2: 88, o3: 42, co: 3.2, temperature: 26, humidity: 62, wind_speed: 1.2 },
-        { id: 3, name: 'Green Urban Park Belt', icon: 'bi-tree-fill', pm25: 18, pm10: 32, no2: 12, o3: 35, co: 0.4, temperature: 21, humidity: 60, wind_speed: 4.5 }
-    ],
-    climate_events: [
-        { id: 1, name: 'Normal Standard Day', icon: 'bi-sun', pm25: 35, pm10: 55, no2: 22, o3: 45, co: 0.8, temperature: 22, humidity: 50, wind_speed: 3.5 },
-        { id: 2, name: 'Wildfire Smoke Inflow', icon: 'bi-fire', pm25: 240, pm10: 320, no2: 65, o3: 95, co: 4.5, temperature: 32, humidity: 30, wind_speed: 1.8 },
-        { id: 3, name: 'Coastal Sea Breeze', icon: 'bi-water', pm25: 12, pm10: 20, no2: 8, o3: 28, co: 0.2, temperature: 19, humidity: 75, wind_speed: 6.2 }
-    ],
-    policy_impact: [
-        { id: 1, name: 'Current Industrial Mix', icon: 'bi-factory', pm25: 95, pm10: 140, no2: 58, o3: 65, co: 2.4, temperature: 25, humidity: 58, wind_speed: 2.1 },
-        { id: 2, name: '100% EV & Zero Emission', icon: 'bi-lightning-charge-fill', pm25: 22, pm10: 38, no2: 9, o3: 32, co: 0.3, temperature: 23, humidity: 52, wind_speed: 3.0 },
-        { id: 3, name: 'Heavy Smog Inversion', icon: 'bi-cloud-haze2-fill', pm25: 195, pm10: 290, no2: 90, o3: 110, co: 3.8, temperature: 14, humidity: 85, wind_speed: 0.6 }
-    ]
-};
-
-function initScenarioStudio() {
-    loadScenarioBatch('urban_shift');
-}
-
-function loadScenarioBatch(batchKey) {
-    if (!scenarioBatches[batchKey]) return;
-    
-    document.querySelectorAll('.preset-pill-btn').forEach(btn => btn.classList.remove('active'));
-    const clickedBtn = Array.from(document.querySelectorAll('.preset-pill-btn')).find(b => b.getAttribute('onclick')?.includes(batchKey));
-    if (clickedBtn) clickedBtn.classList.add('active');
-
-    studioScenarios = JSON.parse(JSON.stringify(scenarioBatches[batchKey]));
-    renderScenarioCards();
     runScenarioComparison();
 }
 
 async function runScenarioComparison() {
     const panel = document.getElementById('scenarioResultsPanel');
     const scoreContainer = document.getElementById('scenarioScoreCards');
+    const insightsBody = document.getElementById('scenarioInsightsBody');
     if (!panel || !scoreContainer) return;
 
     panel.classList.remove('d-none');
@@ -1475,8 +1497,8 @@ async function runScenarioComparison() {
         const data = await response.json();
         if (data.success && data.results) {
             renderScenarioResultCards(data.results);
-            if (typeof renderScenarioComparisonChart === 'function') renderScenarioComparisonChart(data.results);
-            if (typeof renderScenarioInsights === 'function') renderScenarioInsights(data.results);
+            renderScenarioComparisonChart(data.results);
+            renderScenarioInsights(data.results);
         } else {
             scoreContainer.innerHTML = `<div class="alert alert-danger">${data.error || 'Failed to compare scenarios'}</div>`;
         }
@@ -1819,3 +1841,155 @@ async function generateAiHealthPlan() {
     }
 }
 
+// ========================================
+// MULTI-POLLUTANT WHO RADAR PROFILE
+// ========================================
+
+let pollutantRadarChartInstance = null;
+const whoStandards = {
+    pm25: 15.0,  // µg/m³
+    pm10: 45.0,  // µg/m³
+    no2: 25.0,   // ppb / µg/m³
+    o3: 50.0,    // ppb
+    co: 4.0      // ppm
+};
+
+function initPollutantRadar() {
+    const canvas = document.getElementById('pollutantRadarChart');
+    if (!canvas) return;
+
+    pollutantRadarChartInstance = new Chart(canvas, {
+        type: 'radar',
+        data: {
+            labels: ['PM2.5', 'PM10', 'NO2', 'O3', 'CO'],
+            datasets: [
+                {
+                    label: 'WHO 24H Safe Limit (100%)',
+                    data: [100, 100, 100, 100, 100],
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.08)',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    pointRadius: 3,
+                    pointBackgroundColor: '#10b981'
+                },
+                {
+                    label: 'Current Air Toxicity (% of Limit)',
+                    data: [150, 120, 80, 95, 40],
+                    borderColor: '#6366f1',
+                    backgroundColor: 'rgba(99, 102, 241, 0.35)',
+                    borderWidth: 2.5,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#818cf8',
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { color: '#cbd5e1', font: { size: 11 } }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => `${ctx.dataset.label}: ${Math.round(ctx.parsed.r)}%`
+                    }
+                }
+            },
+            scales: {
+                r: {
+                    angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                    grid: { color: 'rgba(255, 255, 255, 0.08)' },
+                    pointLabels: { color: '#f1f5f9', font: { weight: 'bold', size: 12 } },
+                    ticks: {
+                        backdropColor: 'transparent',
+                        color: '#94a3b8',
+                        stepSize: 50,
+                        showLabelBackdrop: false
+                    },
+                    suggestedMin: 0,
+                    suggestedMax: 200
+                }
+            }
+        }
+    });
+
+    // Run initial calculation
+    updatePollutantRadar({ pm25: 80, pm10: 120, no2: 40, o3: 60, co: 1.2 });
+    updateDominantPollutant({ pm25: 80, pm10: 120, no2: 40, o3: 60, co: 1.2 });
+}
+
+function updatePollutantRadar(data) {
+    if (!pollutantRadarChartInstance) return;
+
+    const pm25 = data.pm25 !== undefined ? data.pm25 : 80;
+    const pm10 = data.pm10 !== undefined ? data.pm10 : 120;
+    const no2 = data.no2 !== undefined ? data.no2 : 40;
+    const o3 = data.o3 !== undefined ? data.o3 : 60;
+    const co = data.co !== undefined ? data.co : 1.2;
+
+    const ratios = [
+        Math.round((pm25 / whoStandards.pm25) * 100),
+        Math.round((pm10 / whoStandards.pm10) * 100),
+        Math.round((no2 / whoStandards.no2) * 100),
+        Math.round((o3 / whoStandards.o3) * 100),
+        Math.round((co / whoStandards.co) * 100)
+    ];
+
+    pollutantRadarChartInstance.data.datasets[1].data = ratios;
+    
+    // Dynamically adjust scale max if high pollution
+    const maxVal = Math.max(...ratios, 150);
+    pollutantRadarChartInstance.options.scales.r.suggestedMax = Math.ceil(maxVal / 50) * 50;
+
+    pollutantRadarChartInstance.update();
+}
+
+function updateDominantPollutant(data) {
+    const pm25 = data.pm25 !== undefined ? data.pm25 : 80;
+    const pm10 = data.pm10 !== undefined ? data.pm10 : 120;
+    const no2 = data.no2 !== undefined ? data.no2 : 40;
+    const o3 = data.o3 !== undefined ? data.o3 : 60;
+    const co = data.co !== undefined ? data.co : 1.2;
+
+    const pollutants = [
+        { key: 'PM2.5', name: 'PM2.5 (Fine Particles)', val: pm25, unit: 'µg/m³', limit: whoStandards.pm25, ratio: (pm25 / whoStandards.pm25) * 100 },
+        { key: 'PM10', name: 'PM10 (Coarse Dust)', val: pm10, unit: 'µg/m³', limit: whoStandards.pm10, ratio: (pm10 / whoStandards.pm10) * 100 },
+        { key: 'NO2', name: 'NO2 (Nitrogen Dioxide)', val: no2, unit: 'ppb', limit: whoStandards.no2, ratio: (no2 / whoStandards.no2) * 100 },
+        { key: 'O3', name: 'O3 (Ground Ozone)', val: o3, unit: 'ppb', limit: whoStandards.o3, ratio: (o3 / whoStandards.o3) * 100 },
+        { key: 'CO', name: 'CO (Carbon Monoxide)', val: co, unit: 'ppm', limit: whoStandards.co, ratio: (co / whoStandards.co) * 100 }
+    ];
+
+    pollutants.sort((a, b) => b.ratio - a.ratio);
+    const dominant = pollutants[0];
+
+    const nameEl = document.getElementById('dominantPollutantName');
+    const ratioValEl = document.getElementById('dominantRatioVal');
+    if (nameEl) nameEl.textContent = dominant.name;
+    if (ratioValEl) ratioValEl.textContent = `${Math.round(dominant.ratio)}%`;
+
+    const listContainer = document.getElementById('pollutantBenchmarkList');
+    if (listContainer) {
+        listContainer.innerHTML = pollutants.map(p => {
+            const pct = Math.min(Math.round(p.ratio), 300);
+            let barColor = '#10b981';
+            if (p.ratio > 200) barColor = '#ef4444';
+            else if (p.ratio > 100) barColor = '#f59e0b';
+
+            return `
+                <div class="benchmark-item">
+                    <div class="benchmark-info">
+                        <span>${p.key}: ${p.val} ${p.unit}</span>
+                        <span style="color: ${barColor}">${Math.round(p.ratio)}% of WHO limit</span>
+                    </div>
+                    <div class="benchmark-bar-track">
+                        <div class="benchmark-bar-fill" style="width: ${Math.min((pct / 200) * 100, 100)}%; background: ${barColor};"></div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+}

@@ -871,6 +871,58 @@ ero Section -->
                 </div>
             </div>
 
+            <!-- Multi-Pollutant Radar WHO Benchmark Section -->
+            <div class="row g-4 mt-4" data-aos="fade-up">
+                <div class="col-lg-6">
+                    <div class="analytics-card h-100">
+                        <div class="card-header-modern">
+                            <div class="d-flex align-items-center justify-content-between w-100">
+                                <div>
+                                    <i class="bi bi-radar me-2 text-info"></i>
+                                    <span>Multi-Pollutant WHO Radar Profile</span>
+                                </div>
+                                <span class="badge bg-info-subtle text-info">100% = WHO Safe Limit</span>
+                            </div>
+                        </div>
+                        <div class="card-body-modern">
+                            <div class="radar-chart-container" style="position: relative; height: 320px;">
+                                <canvas id="pollutantRadarChart"></canvas>
+                            </div>
+                            <p class="text-muted small text-center mt-2 mb-0">
+                                <i class="bi bi-info-circle me-1"></i> Shaded region crossing the outer green boundary represents WHO safe exposure violation.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="analytics-card h-100">
+                        <div class="card-header-modern">
+                            <i class="bi bi-exclamation-diamond-fill me-2 text-warning"></i>
+                            <span>Dominant Pollutant & Toxicity Breakdown</span>
+                        </div>
+                        <div class="card-body-modern">
+                            <div class="dominant-pollutant-box" id="dominantPollutantBox">
+                                <div class="dominant-icon-ring">
+                                    <i class="bi bi-fire text-danger" id="dominantIcon"></i>
+                                </div>
+                                <div class="dominant-meta">
+                                    <div class="text-muted small">PRIMARY TOXICITY DRIVER</div>
+                                    <h4 id="dominantPollutantName">PM2.5 (Fine Particulates)</h4>
+                                    <div class="dominant-ratio-chip" id="dominantRatioChip">
+                                        <span id="dominantRatioVal">--%</span> of WHO 24H Guideline
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pollutant-benchmark-list" id="pollutantBenchmarkList">
+                                <div class="loading-skeleton"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="export-section" data-aos="fade-up">
                 <h3>Export Data</h3>
                 <div class="export-buttons">
