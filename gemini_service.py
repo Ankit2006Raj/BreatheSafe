@@ -29,7 +29,11 @@ class GeminiAIService:
         if self.api_key:
             try:
                 genai.configure(api_key=self.api_key)
-                self.model = genai.GenerativeModel('gemini-pro')
+                # Try modern lightweight fast models first, with graceful fallback
+                try:
+                    self.model = genai.GenerativeModel('gemini-1.5-flash')
+                except Exception:
+                    self.model = genai.GenerativeModel('gemini-pro')
                 logger.info("Gemini AI configured successfully")
             except Exception as e:
                 logger.error(f"Error configuring Gemini AI: {e}")
