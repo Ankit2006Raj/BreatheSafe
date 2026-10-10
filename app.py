@@ -242,34 +242,65 @@ def get_recommendations(aqi):
 
 @app.route('/api/compare', methods=['POST'])
 def compare_scenarios():
-    """Compare multiple scenarios"""
+    """Compare multiple scenarios with delta calculations against baseline"""
     try:
         scenarios = request.json.get('scenarios', [])
+        if not scenarios:
+            return jsonify({'error': 'No scenarios provided'}), 400
+            
         results = []
+        baseline_aqi = None
         
-        for scenario in scenarios:
+        for idx, scenario in enumerate(scenarios):
+            pm25 = float(scenario.get('pm25', 0))
+            pm10 = float(scenario.get('pm10', 0))
+            no2 = float(scenario.get('no2', 0))
+            o3 = float(scenario.get('o3', 0))
+            co = float(scenario.get('co', 0))
+            temperature = float(scenario.get('temperature', 20))
+            humidity = float(scenario.get('humidity', 50))
+            wind_speed = float(scenario.get('wind_speed', 2))
+
             user_input = pd.DataFrame([{
-                'pm25': float(scenario['pm25']),
-                'pm10': float(scenario['pm10']),
-                'no2': float(scenario['no2']),
-                'o3': float(scenario['o3']),
-                'co': float(scenario['co']),
-                'temperature': float(scenario['temperature']),
-                'humidity': float(scenario['humidity']),
-                'wind_speed': float(scenario['wind_speed'])
+                'pm25': pm25,
+                'pm10': pm10,
+                'no2': no2,
+                'o3': o3,
+                'co': co,
+                'temperature': temperature,
+                'humidity': humidity,
+                'wind_speed': wind_speed
             }])
             
-            predicted_aqi = model.predict(user_input)[0]
+            predicted_aqi = float(model.predict(user_input)[0])
             category_info = get_aqi_category(predicted_aqi)
             
+            if idx == 0:
+                baseline_aqi = predicted_aqi
+                delta_aqi = 0.0
+            else:
+                delta_aqi = round(predicted_aqi - baseline_aqi, 1)
+
             results.append({
-                'name': scenario.get('name', 'Scenario'),
+                'id': scenario.get('id', idx + 1),
+                'name': scenario.get('name', f'Scenario {idx + 1}'),
+                'icon': scenario.get('icon', 'bi-cloud'),
                 'aqi': round(predicted_aqi, 1),
+                'delta_aqi': delta_aqi,
                 'category': category_info['category'],
-                'color': category_info['color']
+                'color': category_info['color'],
+                'level': category_info['level'],
+                'parameters': {
+                    'pm25': pm25, 'pm10': pm10, 'no2': no2, 'o3': o3, 'co': co,
+                    'temperature': temperature, 'humidity': humidity, 'wind_speed': wind_speed
+                }
             })
         
-        return jsonify({'results': results})
+        return jsonify({
+            'success': True,
+            'results': results,
+            'baseline_name': scenarios[0].get('name', 'Scenario 1') if scenarios else 'Baseline'
+        })
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
