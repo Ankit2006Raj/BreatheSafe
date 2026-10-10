@@ -498,6 +498,98 @@ ero Section -->
         </div>
     </section>
 
+    <!-- Scenario Comparison Studio Section -->
+    <section id="scenarios" class="section-modern">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <div class="section-badge">
+                    <i class="bi bi-shuffle"></i>
+                    <span>Simulation Studio</span>
+                </div>
+                <h2 class="section-title">What-If Scenario Comparison Studio</h2>
+                <p class="section-subtitle">Simulate, compare, and analyze multiple environmental policies & atmospheric conditions side-by-side</p>
+            </div>
+
+            <!-- Quick Preset Bar -->
+            <div class="scenario-preset-bar" data-aos="fade-up" data-aos-delay="100">
+                <div class="preset-label"><i class="bi bi-magic me-2"></i>Quick Load Multi-Scenario Sets:</div>
+                <div class="preset-pills">
+                    <button class="preset-pill-btn active" onclick="loadScenarioBatch('urban_shift')">
+                        <i class="bi bi-buildings"></i> Urban Shift (Traffic vs Green vs Smog)
+                    </button>
+                    <button class="preset-pill-btn" onclick="loadScenarioBatch('climate_events')">
+                        <i class="bi bi-fire"></i> Climate Events (Wildfire vs Dust vs Coastal)
+                    </button>
+                    <button class="preset-pill-btn" onclick="loadScenarioBatch('policy_impact')">
+                        <i class="bi bi-shield-check"></i> Policy Interventions (EV Adoption vs Industry)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Scenario Cards Container (Dynamic) -->
+            <div class="scenarios-grid" id="scenariosContainer" data-aos="fade-up" data-aos-delay="200">
+                <!-- Dynamically populated via script.js -->
+            </div>
+
+            <!-- Studio Action Bar -->
+            <div class="studio-actions-bar" data-aos="fade-up" data-aos-delay="300">
+                <button class="btn-add-scenario" id="btnAddScenario" onclick="addNewScenario()">
+                    <i class="bi bi-plus-circle me-2"></i> Add Scenario
+                </button>
+                <button class="btn-run-comparison" id="btnRunComparison" onclick="runScenarioComparison()">
+                    <i class="bi bi-play-fill me-2"></i> Run Comparative Analysis
+                </button>
+            </div>
+
+            <!-- Comparison Results Matrix & Visualizer -->
+            <div class="scenario-results-panel d-none" id="scenarioResultsPanel" data-aos="fade-up">
+                <div class="results-header-modern">
+                    <div class="results-title-group">
+                        <span class="badge-studio-live">LIVE ANALYSIS</span>
+                        <h3>Comparative Assessment Matrix</h3>
+                    </div>
+                    <div class="results-delta-tag" id="scenarioDeltaSummary">
+                        Baseline Comparison Active
+                    </div>
+                </div>
+
+                <!-- Scenario Result Cards -->
+                <div class="row g-3" id="scenarioScoreCards">
+                    <!-- Populated via JS -->
+                </div>
+
+                <!-- Comparative Chart & Insights -->
+                <div class="row g-4 mt-3">
+                    <div class="col-lg-7">
+                        <div class="scenario-chart-card">
+                            <div class="card-head-sm">
+                                <h6><i class="bi bi-bar-chart me-2"></i>AQI & Toxicity Comparison</h6>
+                                <span class="text-muted small">Higher AQI indicates greater health risk</span>
+                            </div>
+                            <div class="chart-box-sm">
+                                <canvas id="scenarioComparisonChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="scenario-insights-card">
+                            <div class="card-head-sm">
+                                <h6><i class="bi bi-stars me-2"></i>AI Comparative Verdict</h6>
+                                <span class="badge bg-primary-subtle text-primary">Insight</span>
+                            </div>
+                            <div class="insights-body" id="scenarioInsightsBody">
+                                <div class="loading-state-sm">
+                                    <div class="spinner-border spinner-border-sm text-primary"></div>
+                                    <span class="ms-2">Computing scenario variance...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Global Map Section -->
     <section id="map" class="section-modern">
         <div class="container-fluid">
