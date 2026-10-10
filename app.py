@@ -242,13 +242,14 @@ def get_recommendations(aqi):
 
 @app.route('/api/compare', methods=['POST'])
 def compare_scenarios():
-    """Compare multiple scenarios with delta calculations against baseline"""
+    """Compare multiple environmental scenarios with delta metrics and WHO compliance"""
     try:
         scenarios = request.json.get('scenarios', [])
         if not scenarios:
             return jsonify({'error': 'No scenarios provided'}), 400
             
         results = []
+        who_benchmarks = {'pm25': 15.0, 'pm10': 45.0, 'no2': 25.0, 'o3': 50.0, 'co': 4.0}
         baseline_aqi = None
         
         for idx, scenario in enumerate(scenarios):
@@ -281,6 +282,17 @@ def compare_scenarios():
             else:
                 delta_aqi = round(predicted_aqi - baseline_aqi, 1)
 
+            # Determine pollutant ratios vs WHO standard
+            ratios = {
+                'pm25': round((pm25 / who_benchmarks['pm25']) * 100, 1),
+                'pm10': round((pm10 / who_benchmarks['pm10']) * 100, 1),
+                'no2': round((no2 / who_benchmarks['no2']) * 100, 1),
+                'o3': round((o3 / who_benchmarks['o3']) * 100, 1),
+                'co': round((co / who_benchmarks['co']) * 100, 1)
+            }
+            dominant_pollutant = max(ratios, key=ratios.get).upper()
+            dominant_ratio = ratios[dominant_pollutant.lower()]
+
             results.append({
                 'id': scenario.get('id', idx + 1),
                 'name': scenario.get('name', f'Scenario {idx + 1}'),
@@ -290,9 +302,18 @@ def compare_scenarios():
                 'category': category_info['category'],
                 'color': category_info['color'],
                 'level': category_info['level'],
+                'dominant_pollutant': dominant_pollutant,
+                'dominant_ratio': dominant_ratio,
+                'who_ratios': ratios,
                 'parameters': {
-                    'pm25': pm25, 'pm10': pm10, 'no2': no2, 'o3': o3, 'co': co,
-                    'temperature': temperature, 'humidity': humidity, 'wind_speed': wind_speed
+                    'pm25': pm25,
+                    'pm10': pm10,
+                    'no2': no2,
+                    'o3': o3,
+                    'co': co,
+                    'temperature': temperature,
+                    'humidity': humidity,
+                    'wind_speed': wind_speed
                 }
             })
         
