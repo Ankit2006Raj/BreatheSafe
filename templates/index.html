@@ -590,6 +590,159 @@ ero Section -->
         </div>
     </section>
 
+    <!-- Health Personas Section -->
+    <section id="health" class="section-modern section-dark">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <div class="section-badge">
+                    <i class="bi bi-heart-pulse"></i>
+                    <span>Clinical Risk Engine</span>
+                </div>
+                <h2 class="section-title">Personalized Health & Risk Advisor</h2>
+                <p class="section-subtitle">Real-time vulnerability scoring, pulmonary protection protocols, and tailored demographic guidelines</p>
+            </div>
+
+            <!-- Persona Tabs / Grid -->
+            <div class="personas-selector-grid" data-aos="fade-up" data-aos-delay="100">
+                <div class="persona-tab-card active" onclick="selectPersona('athlete')" id="persona-athlete">
+                    <div class="persona-icon-box gradient-orange">
+                        <i class="bi bi-person-walking"></i>
+                    </div>
+                    <div class="persona-meta">
+                        <h5>Outdoor Athlete</h5>
+                        <p>Endurance runners & sports</p>
+                    </div>
+                    <span class="persona-badge-tag">Aerobic Risk</span>
+                </div>
+
+                <div class="persona-tab-card" onclick="selectPersona('children')" id="persona-children">
+                    <div class="persona-icon-box gradient-green">
+                        <i class="bi bi-backpack"></i>
+                    </div>
+                    <div class="persona-meta">
+                        <h5>Children & Schools</h5>
+                        <p>Recess & playground safety</p>
+                    </div>
+                    <span class="persona-badge-tag">Developing Lungs</span>
+                </div>
+
+                <div class="persona-tab-card" onclick="selectPersona('asthmatic')" id="persona-asthmatic">
+                    <div class="persona-icon-box gradient-purple">
+                        <i class="bi bi-lungs"></i>
+                    </div>
+                    <div class="persona-meta">
+                        <h5>Asthmatic & Sensitive</h5>
+                        <p>Respiratory & allergy alerts</p>
+                    </div>
+                    <span class="persona-badge-tag">Airway Hyper-Reactive</span>
+                </div>
+
+                <div class="persona-tab-card" onclick="selectPersona('elderly')" id="persona-elderly">
+                    <div class="persona-icon-box gradient-blue">
+                        <i class="bi bi-heart-pulse-fill"></i>
+                    </div>
+                    <div class="persona-meta">
+                        <h5>Elderly & Cardiac</h5>
+                        <p>Cardiovascular exposure</p>
+                    </div>
+                    <span class="persona-badge-tag">Cardiovascular Focus</span>
+                </div>
+
+                <div class="persona-tab-card" onclick="selectPersona('commuter')" id="persona-commuter">
+                    <div class="persona-icon-box gradient-pink">
+                        <i class="bi bi-car-front-fill"></i>
+                    </div>
+                    <div class="persona-meta">
+                        <h5>Urban Commuter</h5>
+                        <p>Transit & traffic smog</p>
+                    </div>
+                    <span class="persona-badge-tag">Urban Canyon</span>
+                </div>
+            </div>
+
+            <!-- Active Persona Health Dashboard -->
+            <div class="health-advisor-dashboard" data-aos="fade-up" data-aos-delay="200">
+                <div class="row g-4 align-items-stretch">
+                    <!-- Left: Clinical Risk Gauge & Quick Metrics -->
+                    <div class="col-lg-4">
+                        <div class="health-risk-card">
+                            <div class="risk-card-head">
+                                <span class="risk-pill" id="personaActiveBadge">ATHLETE PROTOCOL</span>
+                                <span class="risk-live-dot"><span class="dot-ping"></span> Live AQI: <strong id="healthCurrentAqi">--</strong></span>
+                            </div>
+                            
+                            <div class="health-risk-meter-wrap">
+                                <div class="risk-circle-gauge">
+                                    <svg viewBox="0 0 100 100" class="risk-svg">
+                                        <circle class="risk-meter-bg" cx="50" cy="50" r="42"></circle>
+                                        <circle class="risk-meter-fill" id="healthRiskMeterFill" cx="50" cy="50" r="42"></circle>
+                                    </svg>
+                                    <div class="risk-meter-label">
+                                        <span class="risk-val-large" id="healthRiskScore">--</span>
+                                        <span class="risk-sub-txt">VULNERABILITY INDEX</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="risk-level-badge-wrap">
+                                <div class="risk-level-badge" id="healthRiskLevelBadge">Calculating Risk...</div>
+                            </div>
+
+                            <div class="risk-quick-stats">
+                                <div class="rq-item">
+                                    <span class="rq-label">Outdoor Limit:</span>
+                                    <strong class="rq-val" id="healthOutdoorLimit">--</strong>
+                                </div>
+                                <div class="rq-item">
+                                    <span class="rq-label">Mask Protocol:</span>
+                                    <strong class="rq-val" id="healthMaskProtocol">--</strong>
+                                </div>
+                                <div class="rq-item">
+                                    <span class="rq-label">Indoor Purifier:</span>
+                                    <strong class="rq-val" id="healthIndoorPurifier">--</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Customized Clinical Advisory & Action Checklist -->
+                    <div class="col-lg-8">
+                        <div class="health-guidance-card">
+                            <div class="guidance-head">
+                                <div class="guidance-title">
+                                    <i class="bi bi-shield-check text-success"></i>
+                                    <div>
+                                        <h4 id="healthPersonaHeading">Outdoor Athlete Preventive Guide</h4>
+                                        <p class="text-muted small mb-0">Dynamic recommendations based on current air toxicity levels</p>
+                                    </div>
+                                </div>
+                                <button class="btn-ai-consult" id="btnGenerateAiHealth" onclick="generateAiHealthPlan()">
+                                    <i class="bi bi-stars me-1"></i> AI Consultation
+                                </button>
+                            </div>
+
+                            <div class="guidance-body">
+                                <div class="guidance-checklist" id="healthChecklistContainer">
+                                    <!-- Populated via JS -->
+                                </div>
+
+                                <div class="ai-consult-result-box d-none" id="aiConsultResultBox">
+                                    <div class="ai-consult-head">
+                                        <i class="bi bi-chat-heart-fill me-2 text-primary"></i>
+                                        <span>Dr. BreatheSafe AI Clinical Advisory</span>
+                                    </div>
+                                    <div class="ai-consult-content" id="aiConsultContent">
+                                        <!-- Populated via Gemini API -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Global Map Section -->
     <section id="map" class="section-modern">
         <div class="container-fluid">
