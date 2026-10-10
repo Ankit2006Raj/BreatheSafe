@@ -1520,3 +1520,76 @@ function renderScenarioResultCards(results) {
         `;
     }).join('');
 }
+
+function renderScenarioComparisonChart(results) {
+    const canvas = document.getElementById('scenarioComparisonChart');
+    if (!canvas) return;
+
+    if (scenarioComparisonChartInstance) {
+        scenarioComparisonChartInstance.destroy();
+    }
+
+    const labels = results.map(r => r.name);
+    const aqiData = results.map(r => r.aqi);
+    const bgColors = results.map(r => r.color);
+
+    scenarioComparisonChartInstance = new Chart(canvas, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Predicted AQI',
+                data: aqiData,
+                backgroundColor: bgColors,
+                borderRadius: 8,
+                barThickness: 32
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => `Predicted AQI: ${ctx.parsed.y}`
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(255, 255, 255, 0.06)' },
+                    ticks: { color: '#94a3b8' }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#cbd5e1' }
+                }
+            }
+        }
+    });
+}
+
+function renderScenarioInsights(results) {
+    const container = document.getElementById('scenarioInsightsBody');
+    if (!container || results.length === 0) return;
+
+    const best = [...results].sort((a, b) => a.aqi - b.aqi)[0];
+    const worst = [...results].sort((a, b) => b.aqi - a.aqi)[0];
+    const diff = Math.round(worst.aqi - best.aqi);
+
+    container.innerHTML = `
+        <div class="mb-2">
+            <strong class="text-success"><i class="bi bi-trophy me-1"></i> Cleanest Scenario:</strong>
+            <span>${best.name} (AQI ${best.aqi} — ${best.category})</span>
+        </div>
+        <div class="mb-2">
+            <strong class="text-danger"><i class="bi bi-cone-striped me-1"></i> Highest Risk:</strong>
+            <span>${worst.name} (AQI ${worst.aqi} — ${worst.category})</span>
+        </div>
+        <div class="alert alert-info py-2 px-3 small mt-3 mb-0">
+            <i class="bi bi-info-circle me-1"></i> Policy intervention between the least and most polluted scenarios yields a <strong>${diff} AQI point reduction</strong> (~${Math.round((diff / (worst.aqi || 1)) * 100)}% improvement).
+        </div>
+    `;
+}
