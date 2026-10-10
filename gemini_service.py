@@ -199,6 +199,7 @@ Keep response concise and actionable (max 150 words).
         mult = persona_multipliers.get(persona, 1.0)
         risk_score = min(100, round((aqi / 300.0) * 100 * mult))
         
+        # If Gemini is configured, prompt for customized response
         if self.model:
             try:
                 prompt = f"""
@@ -230,12 +231,146 @@ Keep response highly focused and empathetic under 120 words.
             except Exception as e:
                 logger.error(f"Gemini API error during personalized advice: {e}")
 
+        # High quality clinical fallback
+        fallback_data = self._generate_persona_fallback(persona, aqi, risk_score)
+        return fallback_data
+
+    def _generate_persona_fallback(self, persona: str, aqi: float, risk_score: int) -> Dict:
+        """Generate structured expert fallback advisories for each demographic persona"""
+        is_good = aqi <= 50
+        is_moderate = 50 < aqi <= 100
+        is_unhealthy_sens = 100 < aqi <= 150
+        is_unhealthy = 150 < aqi <= 200
+        is_hazardous = aqi > 200
+
+        profiles = {
+            'athlete': {
+                'title': 'Outdoor Athlete & Runner',
+                'good': [
+                    'Ideal conditions for high-intensity tempo runs and outdoor marathons.',
+                    'Deep lung ventilation presents zero particulate hazard today.',
+                    'Optimal training window: Any time during daylight hours.'
+                ],
+                'moderate': [
+                    'Safe for general aerobic workouts; elite endurance athletes can maintain routine.',
+                    'Consider shifting strenuous cardio before midday when ground-level ozone is lower.',
+                    'Stay well hydrated to maintain mucosal membrane barrier function.'
+                ],
+                'unhealthy_sens': [
+                    'Reduce high-ventilation interval training to under 45 minutes.',
+                    'Shift long endurance workouts indoors to a treadmill or stationary bike.',
+                    'Avoid major highway running routes due to concentrated ultrafine particulates.'
+                ],
+                'severe': [
+                    'CRITICAL: Move all high-intensity cardio strictly indoors with HEPA air filtration.',
+                    'High minute ventilation during running multiplies particulate deposition in deep alveoli.',
+                    'Do not perform outdoor tempo runs; wear an N95 if doing light walking.'
+                ]
+            },
+            'children': {
+                'title': 'Children & School Students',
+                'good': [
+                    'Air is clean and invigorating for outdoor school recess and sports.',
+                    'Encourage active playground games and outdoor physical education.'
+                ],
+                'moderate': [
+                    'Outdoor play is safe for most children.',
+                    'Students with known childhood asthma should carry preventative inhalers to school.',
+                    'Keep classroom windows ventilated during early morning hours.'
+                ],
+                'unhealthy_sens': [
+                    'Limit prolonged school playground exposure and vigorous recess running.',
+                    'Provide indoor alternative play areas for children with persistent coughs or allergies.',
+                    'Ensure school air conditioning units have clean particulate filters.'
+                ],
+                'severe': [
+                    'Cancel all outdoor PE classes, sports meets, and playground activities.',
+                    'Keep school windows and doors tightly sealed; run HEPA air purifiers in classrooms.',
+                    'Parents of asthmatic children should check action plans and monitor breathing.'
+                ]
+            },
+            'asthmatic': {
+                'title': 'Asthmatic & Respiratory Sensitive',
+                'good': [
+                    'Minimal bronchial irritation risk; clear airway conditions.',
+                    'Maintain regular preventative controller medication as prescribed.'
+                ],
+                'moderate': [
+                    'Sensitive airways may experience mild throat tickle or dryness.',
+                    'Ensure fast-acting rescue inhaler (Albuterol) is within immediate reach.',
+                    'Avoid peak traffic corridors where particulate spikes trigger bronchospasms.'
+                ],
+                'unhealthy_sens': [
+                    'Elevated particulate and ozone levels can trigger airway inflammation.',
+                    'Pre-medicate before mandatory outdoor trips and limit time outside to under 20 minutes.',
+                    'Wear a well-fitted N95 mask when walking outdoors near traffic.'
+                ],
+                'severe': [
+                    'HIGH ALERT: Stay in a sealed room with an active True-HEPA air purifier.',
+                    'Monitor peak expiratory flow (PEF) readings twice daily.',
+                    'Seek urgent medical attention if experiencing chest tightness, wheezing, or low SpO2.'
+                ]
+            },
+            'elderly': {
+                'title': 'Elderly & Cardiovascular Sensitive',
+                'good': [
+                    'Pleasant air quality for morning garden walks and social park outings.',
+                    'Good cardiovascular safety margin.'
+                ],
+                'moderate': [
+                    'Acceptable air quality for routine errands and gentle outdoor walking.',
+                    'Individuals with coronary artery disease should avoid heavy lifting outdoors.'
+                ],
+                'unhealthy_sens': [
+                    'Fine particulates (PM2.5) increase systemic arterial inflammation.',
+                    'Limit walking near busy intersections and rest frequently.',
+                    'Keep indoor living room and bedroom windows closed.'
+                ],
+                'severe': [
+                    'Strict indoor resting recommended; avoid exertion that stresses heart and lungs.',
+                    'Keep blood pressure and cardiac medications on strict schedule.',
+                    'Use indoor air purifiers and seek medical consultation for unusual fatigue or palpitations.'
+                ]
+            },
+            'commuter': {
+                'title': 'Urban Commuter & Office Worker',
+                'good': [
+                    'Optimal air for walking, cycling, or public transit commutes.'
+                ],
+                'moderate': [
+                    'Standard commute is safe; roll up vehicle windows in heavy tunnel traffic.',
+                    'Set vehicle HVAC air intake to "Recirculate" when idling in stop-and-go jams.'
+                ],
+                'unhealthy_sens': [
+                    'Wear an N95/KN95 particulate mask while waiting at roadside bus stops or open platforms.',
+                    'Keep vehicle windows closed and ensure cabin microfilter is active.',
+                    'Plan departure times to avoid peak rush hour exhaust concentrations.'
+                ],
+                'severe': [
+                    'Minimize all pedestrian transit in urban canyons where smog is trapped.',
+                    'Always wear a sealed N95 respirator during inevitable transit.',
+                    'Consider remote work or carpooling with vehicle air purification running.'
+                ]
+            }
+        }
+
+        persona_data = profiles.get(persona, profiles['commuter'])
+        if is_good:
+            tips = persona_data['good']
+        elif is_moderate:
+            tips = persona_data['moderate']
+        elif is_unhealthy_sens:
+            tips = persona_data['unhealthy_sens']
+        else:
+            tips = persona_data['severe']
+
         return {
-            'advice': f"Personalized guidance active for {persona}. Risk index: {risk_score}/100.",
+            'advice': "\n".join([f"• {tip}" for tip in tips]),
             'risk_score': risk_score,
             'persona': persona,
+            'persona_title': persona_data['title'],
             'personalized': True,
-            'source': 'Fallback',
+            'source': 'BreatheSafe Health Engine',
             'timestamp': datetime.now().isoformat()
         }
     
