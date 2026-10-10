@@ -3258,3 +3258,382 @@ body.light-mode .leaflet-popup-content-wrapper {
     font-size: 0.85rem;
     opacity: 0.9;
 }
+/* ========================================
+   SCENARIO COMPARISON STUDIO STYLES
+   ======================================== */
+.scenario-preset-bar {
+    background: var(--surface);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    box-shadow: var(--shadow-md);
+}
+
+.preset-label {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+}
+
+.preset-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+.preset-pill-btn {
+    background: var(--surface-light);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.preset-pill-btn:hover {
+    background: rgba(99, 102, 241, 0.15);
+    border-color: var(--primary-light);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+}
+
+.preset-pill-btn.active {
+    background: var(--gradient-1);
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+}
+
+.scenarios-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.scenario-card-studio {
+    background: var(--surface);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: 1.5rem;
+    transition: var(--transition);
+    position: relative;
+    box-shadow: var(--shadow-md);
+}
+
+.scenario-card-studio:hover {
+    border-color: var(--primary-light);
+    box-shadow: var(--shadow-xl);
+    transform: translateY(-4px);
+}
+
+.scenario-card-studio.baseline {
+    border-color: rgba(99, 102, 241, 0.5);
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.15);
+}
+
+.scenario-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.scenario-title-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px dashed var(--border-color);
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: 1.05rem;
+    width: 70%;
+    padding: 0.2rem 0;
+}
+
+.scenario-title-input:focus {
+    outline: none;
+    border-bottom-color: var(--primary);
+}
+
+.scenario-btn-remove {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.scenario-btn-remove:hover {
+    background: var(--danger);
+    color: #fff;
+}
+
+.scenario-param-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.85rem;
+}
+
+.scenario-param-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    width: 35%;
+}
+
+.scenario-slider-wrap {
+    width: 65%;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.scenario-slider-mini {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--surface-light);
+    outline: none;
+}
+
+.scenario-slider-mini::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--primary);
+    cursor: pointer;
+    transition: transform 0.15s ease;
+}
+
+.scenario-slider-mini::-webkit-slider-thumb:hover {
+    transform: scale(1.3);
+}
+
+.scenario-val-box {
+    width: 45px;
+    background: var(--surface-light);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-align: center;
+    padding: 2px 4px;
+}
+
+.studio-actions-bar {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+}
+
+.btn-add-scenario {
+    background: var(--surface-light);
+    border: 1px dashed var(--primary-light);
+    color: var(--primary-light);
+    padding: 0.8rem 1.8rem;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+}
+
+.btn-add-scenario:hover {
+    background: rgba(99, 102, 241, 0.1);
+    transform: translateY(-2px);
+}
+
+.btn-run-comparison {
+    background: var(--gradient-1);
+    color: #fff;
+    border: none;
+    padding: 0.8rem 2.2rem;
+    border-radius: var(--radius-full);
+    font-weight: 700;
+    box-shadow: var(--shadow-lg), 0 0 20px rgba(99, 102, 241, 0.4);
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+}
+
+.btn-run-comparison:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: var(--shadow-xl), 0 0 30px rgba(99, 102, 241, 0.6);
+}
+
+.scenario-results-panel {
+    background: var(--surface);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    box-shadow: var(--shadow-xl);
+}
+
+.results-header-modern {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.badge-studio-live {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: var(--success);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-full);
+    letter-spacing: 0.05em;
+    display: inline-block;
+    margin-bottom: 0.35rem;
+}
+
+.results-title-group h3 {
+    margin: 0;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.results-delta-tag {
+    background: var(--surface-light);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 0.4rem 1rem;
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.scenario-score-card {
+    background: var(--surface-light);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    position: relative;
+    transition: var(--transition);
+}
+
+.scenario-score-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--primary-light);
+}
+
+.scenario-score-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.sc-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+
+.sc-aqi-num {
+    font-size: 2.2rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+
+.sc-delta-badge {
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+.sc-delta-badge.better {
+    background: rgba(16, 185, 129, 0.2);
+    color: var(--success);
+}
+
+.sc-delta-badge.worse {
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--danger);
+}
+
+.sc-delta-badge.baseline {
+    background: rgba(99, 102, 241, 0.2);
+    color: var(--primary-light);
+}
+
+.sc-dominant-tag {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 0.6rem;
+}
+
+.scenario-chart-card, .scenario-insights-card {
+    background: var(--surface-light);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    height: 100%;
+}
+
+.card-head-sm {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.card-head-sm h6 {
+    margin: 0;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.chart-box-sm {
+    position: relative;
+    height: 240px;
+}
+
+.insights-body {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+}
+
