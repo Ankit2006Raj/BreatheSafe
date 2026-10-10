@@ -3637,3 +3637,341 @@ body.light-mode .leaflet-popup-content-wrapper {
     color: var(--text-secondary);
 }
 
+
+/* ========================================
+   HEALTH PERSONAS & RISK ADVISOR STYLES
+   ======================================== */
+.personas-selector-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.persona-tab-card {
+    background: var(--surface);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.persona-tab-card:hover {
+    border-color: var(--primary-light);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.persona-tab-card.active {
+    background: rgba(99, 102, 241, 0.15);
+    border-color: var(--primary);
+    box-shadow: 0 0 25px rgba(99, 102, 241, 0.3);
+}
+
+.persona-icon-box {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #fff;
+    margin-bottom: 0.75rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.persona-meta h5 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.2rem;
+}
+
+.persona-meta p {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.persona-badge-tag {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    background: var(--surface-light);
+    border: 1px solid var(--border-color);
+    color: var(--primary-light);
+    margin-top: 0.75rem;
+}
+
+.health-risk-card {
+    background: var(--surface);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: 1.75rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: var(--shadow-lg);
+}
+
+.risk-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+}
+
+.risk-pill {
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    background: rgba(99, 102, 241, 0.2);
+    color: var(--primary-light);
+    letter-spacing: 0.05em;
+}
+
+.risk-live-dot {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.dot-ping {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--success);
+    display: inline-block;
+    box-shadow: 0 0 10px var(--success);
+}
+
+.health-risk-meter-wrap {
+    display: flex;
+    justify-content: center;
+    margin: 1rem 0;
+}
+
+.risk-circle-gauge {
+    width: 170px;
+    height: 170px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.risk-svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.risk-meter-bg {
+    fill: none;
+    stroke: var(--surface-light);
+    stroke-width: 10;
+}
+
+.risk-meter-fill {
+    fill: none;
+    stroke: var(--success);
+    stroke-width: 10;
+    stroke-linecap: round;
+    stroke-dasharray: 264;
+    stroke-dashoffset: 264;
+    transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.5s ease;
+}
+
+.risk-meter-label {
+    position: absolute;
+    text-align: center;
+}
+
+.risk-val-large {
+    font-size: 2.4rem;
+    font-weight: 900;
+    color: var(--text-primary);
+    display: block;
+    line-height: 1;
+}
+
+.risk-sub-txt {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+}
+
+.risk-level-badge-wrap {
+    text-align: center;
+    margin-bottom: 1.25rem;
+}
+
+.risk-level-badge {
+    display: inline-block;
+    padding: 0.4rem 1.2rem;
+    border-radius: var(--radius-full);
+    font-weight: 700;
+    font-size: 0.85rem;
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--success);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.risk-quick-stats {
+    background: var(--surface-light);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+}
+
+.rq-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+}
+
+.rq-item:last-child {
+    margin-bottom: 0;
+}
+
+.rq-label {
+    color: var(--text-muted);
+}
+
+.rq-val {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.health-guidance-card {
+    background: var(--surface);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: 1.75rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-lg);
+}
+
+.guidance-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.guidance-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.guidance-title i {
+    font-size: 1.8rem;
+}
+
+.guidance-title h4 {
+    margin: 0;
+    font-weight: 800;
+    color: var(--text-primary);
+    font-size: 1.25rem;
+}
+
+.btn-ai-consult {
+    background: var(--gradient-3);
+    color: #0f172a;
+    border: none;
+    padding: 0.5rem 1.2rem;
+    border-radius: var(--radius-full);
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+}
+
+.btn-ai-consult:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(79, 172, 254, 0.5);
+}
+
+.guidance-checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.checklist-item {
+    background: var(--surface-light);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    transition: var(--transition);
+}
+
+.checklist-item:hover {
+    border-color: var(--primary-light);
+    transform: translateX(4px);
+}
+
+.chk-icon {
+    font-size: 1.2rem;
+    color: var(--primary-light);
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.chk-text {
+    font-size: 0.92rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.ai-consult-result-box {
+    margin-top: 1.5rem;
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+}
+
+.ai-consult-head {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+}
+
+.ai-consult-content {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    white-space: pre-line;
+}
+
