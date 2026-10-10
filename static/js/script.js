@@ -1303,3 +1303,122 @@ async function checkAIStatus() {
 document.addEventListener('DOMContentLoaded', function () {
     checkAIStatus();
 });
+
+// ========================================
+// SCENARIO COMPARISON STUDIO
+// ========================================
+
+let studioScenarios = [];
+let scenarioComparisonChartInstance = null;
+
+function renderScenarioCards() {
+    const container = document.getElementById('scenariosContainer');
+    if (!container) return;
+
+    container.innerHTML = studioScenarios.map((sc, idx) => `
+        <div class="scenario-card-studio ${idx === 0 ? 'baseline' : ''}" id="scCard-${sc.id}">
+            <div class="scenario-head">
+                <input type="text" class="scenario-title-input" value="${sc.name}" onchange="updateScenarioName(${sc.id}, this.value)">
+                ${idx === 0 ? '<span class="badge bg-primary-subtle text-primary small">Baseline</span>' : `
+                    <button class="scenario-btn-remove" onclick="removeScenario(${sc.id})" title="Remove scenario">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                `}
+            </div>
+
+            <div class="scenario-param-row">
+                <span class="scenario-param-label">PM2.5 (µg/m³)</span>
+                <div class="scenario-slider-wrap">
+                    <input type="range" class="scenario-slider-mini" min="0" max="250" value="${sc.pm25}" oninput="updateScenarioParam(${sc.id}, 'pm25', this.value)">
+                    <span class="scenario-val-box" id="val-${sc.id}-pm25">${sc.pm25}</span>
+                </div>
+            </div>
+
+            <div class="scenario-param-row">
+                <span class="scenario-param-label">PM10 (µg/m³)</span>
+                <div class="scenario-slider-wrap">
+                    <input type="range" class="scenario-slider-mini" min="0" max="350" value="${sc.pm10}" oninput="updateScenarioParam(${sc.id}, 'pm10', this.value)">
+                    <span class="scenario-val-box" id="val-${sc.id}-pm10">${sc.pm10}</span>
+                </div>
+            </div>
+
+            <div class="scenario-param-row">
+                <span class="scenario-param-label">NO2 (ppb)</span>
+                <div class="scenario-slider-wrap">
+                    <input type="range" class="scenario-slider-mini" min="0" max="100" value="${sc.no2}" oninput="updateScenarioParam(${sc.id}, 'no2', this.value)">
+                    <span class="scenario-val-box" id="val-${sc.id}-no2">${sc.no2}</span>
+                </div>
+            </div>
+
+            <div class="scenario-param-row">
+                <span class="scenario-param-label">O3 (ppb)</span>
+                <div class="scenario-slider-wrap">
+                    <input type="range" class="scenario-slider-mini" min="0" max="150" value="${sc.o3}" oninput="updateScenarioParam(${sc.id}, 'o3', this.value)">
+                    <span class="scenario-val-box" id="val-${sc.id}-o3">${sc.o3}</span>
+                </div>
+            </div>
+
+            <div class="scenario-param-row">
+                <span class="scenario-param-label">CO (ppm)</span>
+                <div class="scenario-slider-wrap">
+                    <input type="range" class="scenario-slider-mini" min="0" max="5" step="0.1" value="${sc.co}" oninput="updateScenarioParam(${sc.id}, 'co', this.value)">
+                    <span class="scenario-val-box" id="val-${sc.id}-co">${sc.co}</span>
+                </div>
+            </div>
+
+            <div class="scenario-param-row">
+                <span class="scenario-param-label">Wind (m/s)</span>
+                <div class="scenario-slider-wrap">
+                    <input type="range" class="scenario-slider-mini" min="0.1" max="15" step="0.1" value="${sc.wind_speed}" oninput="updateScenarioParam(${sc.id}, 'wind_speed', this.value)">
+                    <span class="scenario-val-box" id="val-${sc.id}-wind_speed">${sc.wind_speed}</span>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function updateScenarioName(id, newName) {
+    const sc = studioScenarios.find(s => s.id === id);
+    if (sc) sc.name = newName;
+}
+
+function updateScenarioParam(id, param, val) {
+    const sc = studioScenarios.find(s => s.id === id);
+    if (sc) {
+        sc[param] = parseFloat(val);
+        const valBox = document.getElementById(`val-${id}-${param}`);
+        if (valBox) valBox.textContent = val;
+    }
+}
+
+function addNewScenario() {
+    if (studioScenarios.length >= 4) {
+        showNotification('Maximum 4 scenarios can be compared simultaneously', 'warning');
+        return;
+    }
+    const newId = Date.now();
+    studioScenarios.push({
+        id: newId,
+        name: `Custom Scenario ${studioScenarios.length + 1}`,
+        icon: 'bi-sliders',
+        pm25: 45,
+        pm10: 70,
+        no2: 25,
+        o3: 40,
+        co: 1.0,
+        temperature: 22,
+        humidity: 50,
+        wind_speed: 2.5
+    });
+    renderScenarioCards();
+    showNotification('New scenario added to studio', 'info');
+}
+
+function removeScenario(id) {
+    if (studioScenarios.length <= 1) {
+        showNotification('At least one scenario is required', 'warning');
+        return;
+    }
+    studioScenarios = studioScenarios.filter(s => s.id !== id);
+    renderScenarioCards();
+}
